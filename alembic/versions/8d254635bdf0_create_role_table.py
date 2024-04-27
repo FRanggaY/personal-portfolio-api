@@ -23,7 +23,7 @@ def upgrade() -> None:
         'roles',
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=True),
         sa.Column('code', sa.String(36), unique=True, nullable=False),
-        sa.Column('level', sa.Integer, nullable=False, server_default=0),
+        sa.Column('level', sa.Integer, nullable=False),
         sa.Column('name', sa.String(126), unique=True, nullable=False),
         sa.Column('description', sa.String(256), unique=False, nullable=True),
         sa.Column('is_active', sa.Boolean, default=True),
