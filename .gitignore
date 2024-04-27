@@ -4,3 +4,5 @@ private-refresh.pem
 private.pem
 public.pem
 alembic.ini
+
+static/images/user/*

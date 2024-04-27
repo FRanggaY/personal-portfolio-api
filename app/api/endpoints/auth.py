@@ -114,13 +114,11 @@ async def auth_update_profile(
         file_extension = content_type.split('/')[1] if image else ""
 
         role_id = exist_user.role_id
-        id_employee = exist_user.id_employee
         is_active = exist_user.is_active
 
         user_model = User(
             id=user_id,
             role_id=role_id,
-            id_employee=id_employee,
             username=username,
             email=email,
             name=name,
