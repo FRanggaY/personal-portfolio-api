@@ -6,3 +6,7 @@ public.pem
 alembic.ini
 
 static/images/user/*
+static/images/company/image/*
+static/images/company/logo/*
+static/images/school/image/*
+static/images/school/logo/*
