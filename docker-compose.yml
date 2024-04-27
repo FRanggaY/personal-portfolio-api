@@ -1,0 +1,14 @@
+# docker-compose.yml
+# this set up for production
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+    environment:
+      - PORT=${PORT:-5002}
+    ports:
+      - "${PORT:-5002}:${PORT:-5002}"  # Use PORT from .env, default to 5002 if not set
+    volumes:
+      - .:/code
