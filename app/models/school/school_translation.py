@@ -9,7 +9,7 @@ class SchoolTranslation(Base):
     __tablename__ = "school_translations"
 
     id = Column(String, primary_key=True, index=True)
-    school_id = Column(ForeignKey('companies.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
+    school_id = Column(ForeignKey('schools.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
     name = Column(String(128), unique=False, nullable=False)
     description = Column(String(512), unique=False, nullable=True)
     address = Column(String(512), unique=False, nullable=True)
