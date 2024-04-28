@@ -89,7 +89,7 @@ async def create_school(
     return response
 
 @router.get("", response_model=GeneralDataPaginateResponse, status_code=status.HTTP_200_OK)
-def read_companies(
+def read_schools(
     request: Request,
     sort_by: str = Query(None),
     sort_order: str = Query(None),
@@ -111,7 +111,7 @@ def read_companies(
     base_url = str(request.base_url) if request else ""
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
-    companies = school_service.school_repository.read_companies(
+    schools = school_service.school_repository.read_schools(
         offset=offset, 
         size=size, 
         sort_by=sort_by, 
@@ -120,10 +120,10 @@ def read_companies(
         is_active=is_active
     )
 
-    if not companies:
+    if not schools:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
     
-    count = school_service.school_repository.count_companies(
+    count = school_service.school_repository.count_schools(
         custom_filters=custom_filters,
         is_active=is_active
     )
@@ -131,7 +131,7 @@ def read_companies(
     
 
     datas = []
-    for school in companies:
+    for school in schools:
         datas.append({
             'id': school.id,
             'name': school.name,

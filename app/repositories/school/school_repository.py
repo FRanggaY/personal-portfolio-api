@@ -21,7 +21,7 @@ class SchoolRepository:
     def get_school_by_code(self, code: str) -> School:
         return self.db.query(School).filter(School.code == code).first()
     
-    def read_companies(
+    def read_schools(
         self, 
         sort_by: str = None, 
         sort_order: str = 'asc', 
@@ -57,7 +57,7 @@ class SchoolRepository:
 
         return query.all()
     
-    def count_companies(
+    def count_schools(
         self, 
         custom_filters: dict = None,
         is_active: bool = None,
