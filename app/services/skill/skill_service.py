@@ -44,6 +44,7 @@ class SkillService:
         self.validation_unique_based_other_skill(exist_skill, skill)
         
         exist_skill.website_url = skill.website_url
+        exist_skill.category = skill.category
         exist_skill.is_active = skill.is_active
         exist_skill.created_at = skill.category
 

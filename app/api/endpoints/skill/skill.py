@@ -139,6 +139,7 @@ def read_skills(
             'name': skill.name,
             'code': skill.code,
             'is_active': skill.is_active,
+            'category': skill.category,
             'created_at': str(skill.created_at),
             'updated_at': str(skill.updated_at),
             'image_url': f"{base_url}{skill_service.static_folder_image}/{skill.image_url}" if skill.image_url else None,
@@ -189,6 +190,7 @@ def read_skill(
             'name': skill.name,
             'code': skill.code,
             'is_active': skill.is_active,
+            'category': skill.category,
             'created_at': str(skill.created_at),
             'updated_at': str(skill.updated_at),
             'image_url': f"{base_url}{skill_service.static_folder_image}/{skill.image_url}" if skill.image_url else None,
@@ -219,7 +221,7 @@ async def update_skill(
         - allow to update with role that has authority
     """
     user_id_active = payload.get("uid", None)
-
+    
     # service
     skill_service = SkillService(db)
     role_authority_service = RoleAuthorityService(db)
