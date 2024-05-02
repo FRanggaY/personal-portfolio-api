@@ -18,4 +18,5 @@ class School(Base):
     updated_at = Column(DateTime, server_default=func.NOW(), onupdate=func.NOW(), nullable=False)
 
     school_translations = relationship('SchoolTranslation', back_populates='school', cascade='all, delete')
+    educations = relationship('Education', back_populates='school', cascade='all, delete')
     
