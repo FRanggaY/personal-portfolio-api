@@ -18,4 +18,5 @@ class Company(Base):
     updated_at = Column(DateTime, server_default=func.NOW(), onupdate=func.NOW(), nullable=False)
 
     company_translations = relationship('CompanyTranslation', back_populates='company', cascade='all, delete')
+    experiences = relationship('Experience', back_populates='company', cascade='all, delete')
     

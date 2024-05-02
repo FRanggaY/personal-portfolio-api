@@ -24,6 +24,7 @@ class User(Base):
     
     role = relationship('Role', back_populates='users')
     educations = relationship('Education', back_populates='user', cascade='all, delete')
+    experiences = relationship('Experience', back_populates='user', cascade='all, delete')
     
 class UserGender(EnumParam):
     male = "male"
