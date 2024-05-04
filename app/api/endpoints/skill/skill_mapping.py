@@ -22,7 +22,7 @@ async def create_skill_mapping(
     payload = Depends(Authentication())
 ):
     """
-        Create SkillMapping
+        Create Skill Mapping
 
         - should login
         - allow to create with role that has authority
@@ -36,7 +36,7 @@ async def create_skill_mapping(
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_mapping.value, name=RoleAuthorityName.create.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill.value, name=RoleAuthorityName.create.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to create")
 
@@ -88,11 +88,25 @@ def read_skill_mappings(
     payload = Depends(Authentication())
 ):
     """
-        Read All SkillMapping
+        Read All Skill Mapping
 
         - need login
+
+        - when has authority create other it show skill information
+        - when no has authority, it only show skill it self
     """
+    user_id_active = payload.get("uid", None)
     skill_mapping_service = SkillMappingService(db)
+
+    role_authority_service = RoleAuthorityService(db)
+    user_service = UserService(db)
+
+    user_id_filter = user_id_active
+    
+    user_active = user_service.user_repository.read_user(user_id_active)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_other.value, name=RoleAuthorityName.create.value)
+    if role_authority:
+        user_id_filter = None
 
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
@@ -102,7 +116,8 @@ def read_skill_mappings(
         sort_by=sort_by, 
         sort_order=sort_order, 
         custom_filters=custom_filters,
-        is_active=is_active
+        is_active=is_active,
+        user_id=user_id_filter,
     )
 
     if not skill_mappings:
@@ -110,7 +125,8 @@ def read_skill_mappings(
     
     count = skill_mapping_service.skill_mapping_repository.count_skill_mappings(
         custom_filters=custom_filters,
-        is_active=is_active
+        is_active=is_active,
+        user_id=user_id_filter,
     )
     total_pages = get_total_pages(size, count)
     
@@ -151,16 +167,32 @@ def read_skill_mapping(
     payload = Depends(Authentication())
 ):
     """
-        Read SkillMapping
+        Read Skill Mapping
 
         - should login
+
+        - when has authority view other it show skill information
+        - when no has authority, it only show skill it self
     """
+    user_id_active = payload.get("uid", None)
     skill_mapping_service = SkillMappingService(db)
+    role_authority_service = RoleAuthorityService(db)
+    user_service = UserService(db)
+
+    user_id_filter = user_id_active
+    
+    user_active = user_service.user_repository.read_user(user_id_active)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience_other.value, name=RoleAuthorityName.view.value)
+    if role_authority:
+        user_id_filter = None
+
     skill_mapping = skill_mapping_service.skill_mapping_repository.read_skill_mapping(skill_mapping_id)
 
     if not skill_mapping:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
+    if not user_id_filter and skill_mapping.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
    
     skill = {
         'id': skill_mapping.skill.id,
@@ -190,10 +222,13 @@ async def update_skill_mapping(
     payload = Depends(Authentication())
 ):
     """
-        Update SkillMapping
+        Update Skill Mapping
         
         - should login
         - allow to update with role that has authority
+
+        - when has authority edit other it allow edit skill other
+        - when no has authority, it only edit skill it self
     """
     user_id_active = payload.get("uid", None)
 
@@ -203,16 +238,23 @@ async def update_skill_mapping(
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_mapping.value, name=RoleAuthorityName.edit.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill.value, name=RoleAuthorityName.edit.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to edit")
     
     # validation
     exist_skill_mapping = skill_mapping_service.skill_mapping_repository.read_skill_mapping(skill_mapping_id)
     if not exist_skill_mapping:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="SkillMapping not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Skill Mapping not found")
     
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_other.value, name=RoleAuthorityName.edit.value)
+    if role_authority:
+        user_id_filter = None
     
+    if not user_id_filter and exist_skill_mapping.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
+
     try:
         skill_mapping_model = SkillMapping(
             id=skill_mapping_id,
@@ -247,7 +289,7 @@ async def delete_skill_mapping(
     payload = Depends(Authentication())
 ):
     """
-        Delete SkillMapping
+        Delete Skill Mapping
         
         - should login
         - allow to delete with role that has authority
@@ -260,12 +302,24 @@ async def delete_skill_mapping(
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_mapping.value, name=RoleAuthorityName.delete.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill.value, name=RoleAuthorityName.delete.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to delete")
+    
+    exist_skill_mapping = skill_mapping_service.skill_mapping_repository.read_skill_mapping(skill_mapping_id)
+    if not exist_skill_mapping:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Skill Mapping not found")
+    
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_other.value, name=RoleAuthorityName.delete.value)
+    if role_authority:
+        user_id_filter = None
+
+    if not user_id_filter and exist_skill_mapping.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:
-        skill_mapping_service.delete_skill_mapping(skill_mapping_id)
+        skill_mapping_service.skill_mapping_repository.delete_skill_mapping(exist_skill_mapping)
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 
@@ -278,37 +332,6 @@ async def delete_skill_mapping(
         code=status_code,
         status="OK",
         data=data,
-    )
-    response = JSONResponse(content=data_response.model_dump(), status_code=status_code)
-    return response
-
-@router.get("-resource", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
-async def read_skill_mapping_resource(
-    db: Session = Depends(get_db), 
-    payload = Depends(Authentication())
-):
-    """
-        List access control list for resource skill_mapping based role id
-
-        - should login
-    """
-    user_id_active = payload.get("uid", None)
-    
-    # get service
-    role_authority_service = RoleAuthorityService(db)
-    user_service = UserService(db)
-
-    user_active = user_service.user_repository.read_user(user_id_active)
-
-    # list
-    role_authorities = role_authority_service.role_authority_repository.read_role_authorities(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_mapping.value)
-    role_authority_list = [role_authority.name for role_authority in role_authorities] if role_authorities else []
-
-    status_code = status.HTTP_200_OK
-    data_response = GeneralDataResponse(
-        code=status_code,
-        status="OK",
-        data=role_authority_list,
     )
     response = JSONResponse(content=data_response.model_dump(), status_code=status_code)
     return response

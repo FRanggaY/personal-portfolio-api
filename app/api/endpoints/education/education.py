@@ -93,8 +93,21 @@ def read_educations(
         Read All Education
 
         - need login
+
+        - when has authority create other it show education information
+        - when no has authority, it only show education it self
     """
+    user_id_active = payload.get("uid", None)
     education_service = EducationService(db)
+    role_authority_service = RoleAuthorityService(db)
+    user_service = UserService(db)
+
+    user_id_filter = user_id_active
+    
+    user_active = user_service.user_repository.read_user(user_id_active)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.education_other.value, name=RoleAuthorityName.create.value)
+    if role_authority:
+        user_id_filter = None
 
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
@@ -104,7 +117,8 @@ def read_educations(
         sort_by=sort_by, 
         sort_order=sort_order, 
         custom_filters=custom_filters,
-        is_active=is_active
+        is_active=is_active,
+        user_id=user_id_filter,
     )
 
     if not educations:
@@ -112,7 +126,8 @@ def read_educations(
     
     count = education_service.education_repository.count_educations(
         custom_filters=custom_filters,
-        is_active=is_active
+        is_active=is_active,
+        user_id=user_id_filter,
     )
     total_pages = get_total_pages(size, count)
     
@@ -159,13 +174,29 @@ def read_education(
         Read Education
 
         - should login
+
+        - when has authority view other it show education information
+        - when no has authority, it only show education it self
     """
+    user_id_active = payload.get("uid", None)
     education_service = EducationService(db)
+    role_authority_service = RoleAuthorityService(db)
+    user_service = UserService(db)
+
+    user_id_filter = user_id_active
+    
+    user_active = user_service.user_repository.read_user(user_id_active)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.education_other.value, name=RoleAuthorityName.view.value)
+    if role_authority:
+        user_id_filter = None
+
     education = education_service.education_repository.read_education(education_id)
 
     if not education:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
+    if not user_id_filter and education.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
    
     school = {
         'id': education.school.id,
@@ -206,6 +237,9 @@ async def update_education(
         
         - should login
         - allow to update with role that has authority
+
+        - when has authority edit other it allow edit education other
+        - when no has authority, it only edit education it self
     """
     user_id_active = payload.get("uid", None)
 
@@ -220,6 +254,11 @@ async def update_education(
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to edit")
     
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.education_other.value, name=RoleAuthorityName.edit.value)
+    if role_authority:
+        user_id_filter = None
+    
     # validation
     exist_education = education_service.education_repository.read_education(education_id)
     if not exist_education:
@@ -229,6 +268,9 @@ async def update_education(
     if not exist_school:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="School not exist")
     
+    if not user_id_filter and exist_education.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
+
     try:
         education_model = Education(
             id=education_id,
@@ -271,6 +313,9 @@ async def delete_education(
         
         - should login
         - allow to delete with role that has authority
+
+        - when has authority delete other it allow delete education other
+        - when no has authority, it only delete education it self
     """
     user_id_active = payload.get("uid", None)
 
@@ -283,9 +328,21 @@ async def delete_education(
     role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.education.value, name=RoleAuthorityName.delete.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to delete")
+    
+    exist_education = education_service.education_repository.read_education(education_id)
+    if not exist_education:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Education not found")
+    
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.education_other.value, name=RoleAuthorityName.delete.value)
+    if role_authority:
+        user_id_filter = None
+    
+    if not user_id_filter and exist_education.user_id != user_id_filter:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:
-        education_service.delete_education(education_id)
+        education_service.education_repository.delete_education(exist_education)
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 
@@ -321,7 +378,7 @@ async def read_education_resource(
     user_active = user_service.user_repository.read_user(user_id_active)
 
     # list
-    role_authorities = role_authority_service.role_authority_repository.read_role_authorities(role_id=user_active.role_id, feature=RoleAuthorityFeature.education.value)
+    role_authorities = role_authority_service.role_authority_repository.read_role_authorities(role_id=user_active.role_id, feature=[RoleAuthorityFeature.education.value, RoleAuthorityFeature.education_other.value])
     role_authority_list = [role_authority.name for role_authority in role_authorities] if role_authorities else []
 
     status_code = status.HTTP_200_OK

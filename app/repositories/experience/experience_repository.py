@@ -23,12 +23,16 @@ class ExperienceRepository:
         offset: int = None, 
         size: int = None,
         is_active: bool = None,
+        user_id: str = None,
     ) -> list[Experience]:
         query = self.db.query(Experience)
 
         # Filtering
         if is_active is not None:
             query = query.filter(Experience.is_active == is_active)
+
+        if user_id is not None:
+            query = query.filter(Experience.user_id == user_id)
 
         # Apply custom filters
         if custom_filters is not None:
@@ -55,12 +59,16 @@ class ExperienceRepository:
         self, 
         custom_filters: dict = None,
         is_active: bool = None,
+        user_id: str = None,
     ) -> int:
         query = self.db.query(Experience)
 
         # Filtering
         if is_active is not None:
             query = query.filter(Experience.is_active == is_active)
+        
+        if user_id is not None:
+            query = query.filter(Experience.user_id == user_id)
 
         # Apply custom filters
         if custom_filters is not None:

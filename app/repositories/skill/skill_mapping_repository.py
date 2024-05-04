@@ -23,12 +23,16 @@ class SkillMappingRepository:
         offset: int = None, 
         size: int = None,
         is_active: bool = None,
+        user_id: str = None,
     ) -> list[SkillMapping]:
         query = self.db.query(SkillMapping)
 
         # Filtering
         if is_active is not None:
             query = query.filter(SkillMapping.is_active == is_active)
+
+        if user_id is not None:
+            query = query.filter(SkillMapping.user_id == user_id)
 
         # Apply custom filters
         if custom_filters is not None:
@@ -55,12 +59,16 @@ class SkillMappingRepository:
         self, 
         custom_filters: dict = None,
         is_active: bool = None,
+        user_id: str = None,
     ) -> int:
         query = self.db.query(SkillMapping)
 
         # Filtering
         if is_active is not None:
             query = query.filter(SkillMapping.is_active == is_active)
+        
+        if user_id is not None:
+            query = query.filter(SkillMapping.user_id == user_id)
 
         # Apply custom filters
         if custom_filters is not None:

@@ -93,8 +93,22 @@ def read_experiences(
         Read All Experience
 
         - need login
+
+        - when has authority create other it show experience information
+        - when no has authority, it only show experience it self
     """
+    user_id_active = payload.get("uid", None)
     experience_service = ExperienceService(db)
+
+    role_authority_service = RoleAuthorityService(db)
+    user_service = UserService(db)
+
+    user_id_filter = user_id_active
+    
+    user_active = user_service.user_repository.read_user(user_id_active)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience_other.value, name=RoleAuthorityName.create.value)
+    if role_authority:
+        user_id_filter = None
 
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
@@ -104,7 +118,8 @@ def read_experiences(
         sort_by=sort_by, 
         sort_order=sort_order, 
         custom_filters=custom_filters,
-        is_active=is_active
+        is_active=is_active,
+        user_id=user_id_filter,
     )
 
     if not experiences:
@@ -112,7 +127,8 @@ def read_experiences(
     
     count = experience_service.experience_repository.count_experiences(
         custom_filters=custom_filters,
-        is_active=is_active
+        is_active=is_active,
+        user_id=user_id_filter,
     )
     total_pages = get_total_pages(size, count)
     
@@ -159,13 +175,30 @@ def read_experience(
         Read Experience
 
         - should login
+
+        - when has authority view other it show experience information
+        - when no has authority, it only show experience it self
     """
+    user_id_active = payload.get("uid", None)
     experience_service = ExperienceService(db)
+
+    role_authority_service = RoleAuthorityService(db)
+    user_service = UserService(db)
+
+    user_id_filter = user_id_active
+    
+    user_active = user_service.user_repository.read_user(user_id_active)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience_other.value, name=RoleAuthorityName.view.value)
+    if role_authority:
+        user_id_filter = None
+
     experience = experience_service.experience_repository.read_experience(experience_id)
 
     if not experience:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
+    if not user_id_filter and experience.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
    
     company = {
         'id': experience.company.id,
@@ -206,6 +239,9 @@ async def update_experience(
         
         - should login
         - allow to update with role that has authority
+
+        - when has authority edit other it allow edit experience other
+        - when no has authority, it only edit experience it self
     """
     user_id_active = payload.get("uid", None)
 
@@ -220,6 +256,11 @@ async def update_experience(
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to edit")
     
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience_other.value, name=RoleAuthorityName.edit.value)
+    if role_authority:
+        user_id_filter = None
+
     # validation
     exist_experience = experience_service.experience_repository.read_experience(experience_id)
     if not exist_experience:
@@ -229,6 +270,9 @@ async def update_experience(
     if not exist_company:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Company not exist")
     
+    if not user_id_filter and exist_experience.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
+
     try:
         experience_model = Experience(
             id=experience_id,
@@ -271,6 +315,9 @@ async def delete_experience(
         
         - should login
         - allow to delete with role that has authority
+
+        - when has authority delete other it allow delete experience other
+        - when no has authority, it only delete experience it self
     """
     user_id_active = payload.get("uid", None)
 
@@ -283,9 +330,21 @@ async def delete_experience(
     role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience.value, name=RoleAuthorityName.delete.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to delete")
+    
+    exist_experience = experience_service.experience_repository.read_experience(experience_id)
+    if not exist_experience:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Experience not found")
+
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience_other.value, name=RoleAuthorityName.delete.value)
+    if role_authority:
+        user_id_filter = None
+    
+    if not user_id_filter and exist_experience.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:
-        experience_service.delete_experience(experience_id)
+        experience_service.experience_repository.delete_experience(experience_id)
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 
@@ -321,7 +380,7 @@ async def read_experience_resource(
     user_active = user_service.user_repository.read_user(user_id_active)
 
     # list
-    role_authorities = role_authority_service.role_authority_repository.read_role_authorities(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience.value)
+    role_authorities = role_authority_service.role_authority_repository.read_role_authorities(role_id=user_active.role_id, feature=[RoleAuthorityFeature.experience.value, RoleAuthorityFeature.experience_other.value])
     role_authority_list = [role_authority.name for role_authority in role_authorities] if role_authorities else []
 
     status_code = status.HTTP_200_OK

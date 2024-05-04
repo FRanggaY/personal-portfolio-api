@@ -20,10 +20,3 @@ class ExperienceService:
         exist_experience.is_active = experience.is_active
 
         return self.experience_repository.update_experience(exist_experience)
-    
-    def delete_experience(self, experience_id: str):
-        experience = self.experience_repository.read_experience(experience_id)
-        if not experience:
-            raise ValueError("Experience not found")
-        
-        return self.experience_repository.delete_experience(experience)

@@ -20,10 +20,3 @@ class EducationService:
         exist_education.is_active = education.is_active
 
         return self.education_repository.update_education(exist_education)
-    
-    def delete_education(self, education_id: str):
-        education = self.education_repository.read_education(education_id)
-        if not education:
-            raise ValueError("Education not found")
-        
-        return self.education_repository.delete_education(education)

@@ -16,10 +16,3 @@ class SkillMappingService:
         exist_skill_mapping.is_active = skill_mapping.is_active
 
         return self.skill_mapping_repository.update_skill_mapping(exist_skill_mapping)
-    
-    def delete_skill_mapping(self, skill_mapping_id: str):
-        skill_mapping = self.skill_mapping_repository.read_skill_mapping(skill_mapping_id)
-        if not skill_mapping:
-            raise ValueError("Skill Mapping not found")
-        
-        return self.skill_mapping_repository.delete_skill_mapping(skill_mapping)

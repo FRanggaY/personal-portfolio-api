@@ -338,7 +338,7 @@ async def read_skill_resource(
     user_active = user_service.user_repository.read_user(user_id_active)
 
     # list
-    role_authorities = role_authority_service.role_authority_repository.read_role_authorities(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill.value)
+    role_authorities = role_authority_service.role_authority_repository.read_role_authorities(role_id=user_active.role_id, feature=[RoleAuthorityFeature.skill.value, RoleAuthorityFeature.skill_other.value])
     role_authority_list = [role_authority.name for role_authority in role_authorities] if role_authorities else []
 
     status_code = status.HTTP_200_OK
