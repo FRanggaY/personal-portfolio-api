@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.response import GeneralDataPaginateResponse, GeneralDataResponse
 from app.models.role_authority import RoleAuthorityFeature, RoleAuthorityName
-from app.models.solution.solution import Solution
+from app.models.project.project_attachment import ProjectAttachment
 from app.services.role_authority_service import RoleAuthorityService
-from app.services.solution.solution_service import SolutionService
-from app.services.company.company_service import CompanyService
+from app.services.project.project_attachment_service import ProjectAttachmentService
+from app.services.project.project_service import ProjectService
 from app.services.user_service import UserService
 from app.utils.authentication import Authentication
 from app.utils.handling_file import validation_file
@@ -17,15 +17,18 @@ from app.utils.manual import get_total_pages
 router = APIRouter()
 
 @router.post("", response_model=GeneralDataResponse, status_code=status.HTTP_201_CREATED)
-async def create_solution(
+async def create_project_attachment(
+    project_id: str = Form(..., min_length=1, max_length=36),
     title: str = Form(..., min_length=1, max_length=128),
+    description: str = Form(..., min_length=1, max_length=512),
+    website_url: str = Form(..., min_length=1, max_length=512),
+    category: str = Form(..., min_length=1, max_length=512),
     image: UploadFile = None,
-    logo: UploadFile = None,
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
     """
-        Create Solution
+        Create ProjectAttachment
 
         - should login
         - allow to create with role that has authority
@@ -33,39 +36,41 @@ async def create_solution(
     user_id_active = payload.get("uid", None)
 
     # service
-    solution_service = SolutionService(db)
+    project_service = ProjectService(db)
+    project_attachment_service = ProjectAttachmentService(db)
     role_authority_service = RoleAuthorityService(db)
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.solution.value, name=RoleAuthorityName.create.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project.value, name=RoleAuthorityName.create.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to create")
 
+    # validation
+    exist_project = project_service.project_repository.read_project(project_id)
+    if not exist_project:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Company not exist")
+    
     try:
         if (image):
             await validation_file(file=image)
-        
-        if (logo):
-            await validation_file(file=logo)
 
         content_type_image = image.content_type if image else ""
         file_extension_image = content_type_image.split('/')[1] if image else ""
         
-        content_type_logo = logo.content_type if logo else ""
-        file_extension_logo = content_type_logo.split('/')[1] if logo else ""
-        
-        solution_model = Solution(
+        project_attachment_model = ProjectAttachment(
+            project_id=project_id,
             user_id=user_id_active,
             title=title,
+            description=description,
+            website_url=website_url,
+            category=category,
         )
 
-        data = solution_service.create_solution(
-            solution_model,
+        data = project_attachment_service.create_project_attachment(
+            project_attachment_model,
             image,
-            logo,
             file_extension_image,
-            file_extension_logo
         )
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
@@ -85,8 +90,9 @@ async def create_solution(
     return response
 
 @router.get("", response_model=GeneralDataPaginateResponse, status_code=status.HTTP_200_OK)
-def read_solutions(
+def read_project_attachments(
     request: Request,
+    project_id: str = Query(None),
     sort_by: str = Query(None),
     sort_order: str = Query(None),
     filter_by_column: str = Query(None),
@@ -98,15 +104,15 @@ def read_solutions(
     payload = Depends(Authentication())
 ):
     """
-        Read All Solution
+        Read All ProjectAttachment
 
         - need login
 
-        - when has authority create other it show solution information
-        - when no has authority, it only show solution it self
+        - when has authority create other it show project_attachment information
+        - when no has authority, it only show project_attachment it self
     """
     user_id_active = payload.get("uid", None)
-    solution_service = SolutionService(db)
+    project_attachment_service = ProjectAttachmentService(db)
 
     role_authority_service = RoleAuthorityService(db)
     user_service = UserService(db)
@@ -114,14 +120,14 @@ def read_solutions(
     user_id_filter = user_id_active
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.solution_other.value, name=RoleAuthorityName.create.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project.value, name=RoleAuthorityName.create.value)
     if role_authority:
         user_id_filter = None
 
     base_url = str(request.base_url) if request else ""
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
-    solutions = solution_service.solution_repository.read_solutions(
+    project_attachments = project_attachment_service.project_attachment_repository.read_project_attachments(
         offset=offset, 
         size=size, 
         sort_by=sort_by, 
@@ -129,34 +135,33 @@ def read_solutions(
         custom_filters=custom_filters,
         is_active=is_active,
         user_id=user_id_filter,
+        project_id=project_id
     )
 
-    if not solutions:
+    if not project_attachments:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
     
-    count = solution_service.solution_repository.count_solutions(
+    count = project_attachment_service.project_attachment_repository.count_project_attachments(
         custom_filters=custom_filters,
         is_active=is_active,
         user_id=user_id_filter,
+        project_id=project_id
     )
     total_pages = get_total_pages(size, count)
     
 
     datas = []
-    for solution in solutions:
-        company = {
-            'id': solution.company.id,
-            'name': solution.company.name,
-        } if solution.company else None
+    for project_attachment in project_attachments:
         datas.append({
-            'id': solution.id,
-            'name': company,
-            'title': solution.title,
-            'is_active': solution.is_active,
-            'created_at': str(solution.created_at),
-            'updated_at': str(solution.updated_at),
-            'image_url': f"{base_url}{solution_service.static_folder_image}/{solution.image_url}" if solution.image_url else None,
-            'logo_url': f"{base_url}{solution_service.static_folder_logo}/{solution.logo_url}" if solution.logo_url else None,
+            'id': project_attachment.id,
+            'title': project_attachment.title,
+            'is_active': project_attachment.is_active,
+            'description': project_attachment.description,
+            'website_url': project_attachment.website_url,
+            'category': project_attachment.category,
+            'created_at': str(project_attachment.created_at),
+            'updated_at': str(project_attachment.updated_at),
+            'image_url': f"{base_url}{project_attachment_service.static_folder_image}/{project_attachment.image_url}" if project_attachment.image_url else None,
         })
 
     status_code = status.HTTP_200_OK
@@ -174,23 +179,23 @@ def read_solutions(
     response = JSONResponse(content=data_response.model_dump(), status_code=status_code)
     return response
 
-@router.get("/{solution_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
-def read_solution(
-    solution_id: str,
+@router.get("/{project_attachment_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
+def read_project_attachment(
+    project_attachment_id: str,
     request: Request,
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
     """
-        Read Solution
+        Read ProjectAttachment
 
         - should login
 
-        - when has authority view other it show solution information
-        - when no has authority, it only show solution it self
+        - when has authority view other it show project_attachment information
+        - when no has authority, it only show project_attachment it self
     """
     user_id_active = payload.get("uid", None)
-    solution_service = SolutionService(db)
+    project_attachment_service = ProjectAttachmentService(db)
 
     role_authority_service = RoleAuthorityService(db)
     user_service = UserService(db)
@@ -198,112 +203,112 @@ def read_solution(
     user_id_filter = user_id_active
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.solution_other.value, name=RoleAuthorityName.view.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project.value, name=RoleAuthorityName.view.value)
     if role_authority:
         user_id_filter = None
 
     base_url = str(request.base_url) if request else ""
-    solution = solution_service.solution_repository.read_solution(solution_id)
+    project_attachment = project_attachment_service.project_attachment_repository.read_project_attachment(project_attachment_id)
 
-    if not solution:
+    if not project_attachment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
-    if not user_id_filter and solution.user_id != user_id_filter:
+    if not user_id_filter and project_attachment.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
-   
-    company = {
-        'id': solution.company.id,
-        'name': solution.company.name,
-    } if solution.company else None
 
     status_code = status.HTTP_200_OK
     data_response = GeneralDataResponse(
         code=status_code,
         status="OK",
         data={
-            'id': solution.id,
-            'name': company,
-            'title': solution.title,
-            'is_active': solution.is_active,
-            'created_at': str(solution.created_at),
-            'updated_at': str(solution.updated_at),
-            'image_url': f"{base_url}{solution_service.static_folder_image}/{solution.image_url}" if solution.image_url else None,
-            'logo_url': f"{base_url}{solution_service.static_folder_logo}/{solution.logo_url}" if solution.logo_url else None,
+            'id': project_attachment.id,
+            'title': project_attachment.title,
+            'is_active': project_attachment.is_active,
+            'description': project_attachment.description,
+            'website_url': project_attachment.website_url,
+            'category': project_attachment.category,
+            'created_at': str(project_attachment.created_at),
+            'updated_at': str(project_attachment.updated_at),
+            'image_url': f"{base_url}{project_attachment_service.static_folder_image}/{project_attachment.image_url}" if project_attachment.image_url else None,
         },
     )
     response = JSONResponse(content=data_response.model_dump(), status_code=status_code)
     return response
 
-@router.patch("/{solution_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
-async def update_solution(
-    solution_id: str,
+@router.patch("/{project_attachment_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
+async def update_project_attachment(
+    project_attachment_id: str,
+    project_id: str = Form(..., min_length=1, max_length=36),
     title: str = Form(None, min_length=0, max_length=128),
+    description: str = Form(None, min_length=0, max_length=512),
+    website_url: str = Form(None, min_length=0, max_length=512),
+    category: str = Form(None, min_length=0, max_length=512),
     image: UploadFile = None,
-    logo: UploadFile = None,
     is_active: bool = Form(default=True),
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
     """
-        Update Solution
+        Update ProjectAttachment
         
         - should login
         - allow to update with role that has authority
 
-        - when has authority edit other it allow edit solution other
-        - when no has authority, it only edit solution it self
+        - when has authority edit other it allow edit project_attachment other
+        - when no has authority, it only edit project_attachment it self
     """
     user_id_active = payload.get("uid", None)
 
     # service
-    solution_service = SolutionService(db)
+    project_service = ProjectService(db)
+    project_attachment_service = ProjectAttachmentService(db)
     role_authority_service = RoleAuthorityService(db)
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.solution.value, name=RoleAuthorityName.edit.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project.value, name=RoleAuthorityName.edit.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to edit")
     
     user_id_filter = user_id_active
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.solution_other.value, name=RoleAuthorityName.edit.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project.value, name=RoleAuthorityName.edit.value)
     if role_authority:
         user_id_filter = None
 
     # validation
-    exist_solution = solution_service.solution_repository.read_solution(solution_id)
-    if not exist_solution:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Solution not found")
+    exist_project_attachment = project_attachment_service.project_attachment_repository.read_project_attachment(project_attachment_id)
+    if not exist_project_attachment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ProjectAttachment not found")
     
-    if not user_id_filter and exist_solution.user_id != user_id_filter:
+    exist_project = project_service.project_repository.read_project(project_id)
+    if not exist_project:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Company not exist")
+    
+    if not user_id_filter and exist_project_attachment.project.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
 
     try:
         if (image):
             await validation_file(file=image)
-        
-        if (logo):
-            await validation_file(file=logo)
 
         content_type_image = image.content_type if image else ""
         file_extension_image = content_type_image.split('/')[1] if image else ""
-        
-        content_type_logo = logo.content_type if logo else ""
-        file_extension_logo = content_type_logo.split('/')[1] if logo else ""
 
-        solution_model = Solution(
-            id=solution_id,
+        project_attachment_model = ProjectAttachment(
+            id=project_attachment_id,
+            project_id=project_id,
             title=title,
             is_active=is_active,
+            description=description,
+            website_url=website_url,
+            category=category,
         )
 
-        data = solution_service.update_solution(
-            exist_solution,
-            solution_model,
+        data = project_attachment_service.update_project_attachment(
+            exist_project_attachment,
+            project_attachment_model,
             image,
-            logo,
             file_extension_image,
-            file_extension_logo
         )
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
@@ -322,90 +327,59 @@ async def update_solution(
     return response
 
 
-@router.delete("/{solution_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
-async def delete_solution(
-    solution_id: str,
+@router.delete("/{project_attachment_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
+async def delete_project_attachment(
+    project_attachment_id: str,
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
     """
-        Delete Solution
+        Delete ProjectAttachment
         
         - should login
         - allow to delete with role that has authority
 
-        - when has authority delete other it allow delete solution other
-        - when no has authority, it only delete solution it self
+        - when has authority delete other it allow delete project_attachment other
+        - when no has authority, it only delete project_attachment it self
     """
     user_id_active = payload.get("uid", None)
 
     # service
-    solution_service = SolutionService(db)
+    project_attachment_service = ProjectAttachmentService(db)
     role_authority_service = RoleAuthorityService(db)
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.solution.value, name=RoleAuthorityName.delete.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project.value, name=RoleAuthorityName.delete.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to delete")
     
-    exist_solution = solution_service.solution_repository.read_solution(solution_id)
-    if not exist_solution:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Solution not found")
+    exist_project_attachment = project_attachment_service.project_attachment_repository.read_project_attachment(project_attachment_id)
+    if not exist_project_attachment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ProjectAttachment not found")
 
     user_id_filter = user_id_active
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.solution_other.value, name=RoleAuthorityName.delete.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project.value, name=RoleAuthorityName.delete.value)
     if role_authority:
         user_id_filter = None
     
-    if not user_id_filter and exist_solution.user_id != user_id_filter:
+    if not user_id_filter and exist_project_attachment.project.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:
-        solution_service.delete_solution(solution_id)
+        project_attachment_service.delete_project_attachment(project_attachment_id)
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 
     status_code = status.HTTP_200_OK
     data = {
-        'id': solution_id,
+        'id': project_attachment_id,
     }
 
     data_response = GeneralDataResponse(
         code=status_code,
         status="OK",
         data=data,
-    )
-    response = JSONResponse(content=data_response.model_dump(), status_code=status_code)
-    return response
-
-@router.get("-resource", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
-async def read_solution_resource(
-    db: Session = Depends(get_db), 
-    payload = Depends(Authentication())
-):
-    """
-        List access control list for resource solution based role id
-
-        - should login
-    """
-    user_id_active = payload.get("uid", None)
-    
-    # get service
-    role_authority_service = RoleAuthorityService(db)
-    user_service = UserService(db)
-
-    user_active = user_service.user_repository.read_user(user_id_active)
-
-    # list
-    role_authorities = role_authority_service.role_authority_repository.read_role_authorities(role_id=user_active.role_id, feature=[RoleAuthorityFeature.solution.value, RoleAuthorityFeature.solution_other.value])
-    role_authority_list = [role_authority.name for role_authority in role_authorities] if role_authorities else []
-
-    status_code = status.HTTP_200_OK
-    data_response = GeneralDataResponse(
-        code=status_code,
-        status="OK",
-        data=role_authority_list,
     )
     response = JSONResponse(content=data_response.model_dump(), status_code=status_code)
     return response

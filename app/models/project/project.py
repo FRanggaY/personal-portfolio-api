@@ -17,4 +17,5 @@ class Project(Base):
     updated_at = Column(DateTime, server_default=func.NOW(), onupdate=func.NOW(), nullable=False)
 
     project_translations = relationship('ProjectTranslation', back_populates='project', cascade='all, delete')
+    project_attachments = relationship('ProjectAttachment', back_populates='project', cascade='all, delete')
     user = relationship('User', back_populates='projects')

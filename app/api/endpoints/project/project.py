@@ -8,7 +8,6 @@ from app.models.role_authority import RoleAuthorityFeature, RoleAuthorityName
 from app.models.project.project import Project
 from app.services.role_authority_service import RoleAuthorityService
 from app.services.project.project_service import ProjectService
-from app.services.company.company_service import CompanyService
 from app.services.user_service import UserService
 from app.utils.authentication import Authentication
 from app.utils.handling_file import validation_file
@@ -18,7 +17,6 @@ router = APIRouter()
 
 @router.post("", response_model=GeneralDataResponse, status_code=status.HTTP_201_CREATED)
 async def create_project(
-    company_id: str = Form(..., min_length=1, max_length=36),
     title: str = Form(..., min_length=1, max_length=128),
     image: UploadFile = None,
     logo: UploadFile = None,
@@ -34,7 +32,6 @@ async def create_project(
     user_id_active = payload.get("uid", None)
 
     # service
-    company_service = CompanyService(db)
     project_service = ProjectService(db)
     role_authority_service = RoleAuthorityService(db)
     user_service = UserService(db)
@@ -43,11 +40,6 @@ async def create_project(
     role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project.value, name=RoleAuthorityName.create.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to create")
-
-    # validation
-    exist_company = company_service.company_repository.read_company(company_id)
-    if not exist_company:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Company not exist")
     
     try:
         if (image):
@@ -63,7 +55,6 @@ async def create_project(
         file_extension_logo = content_type_logo.split('/')[1] if logo else ""
         
         project_model = Project(
-            company_id=company_id,
             user_id=user_id_active,
             title=title,
         )
@@ -245,7 +236,6 @@ def read_project(
 @router.patch("/{project_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
 async def update_project(
     project_id: str,
-    company_id: str = Form(..., min_length=1, max_length=36),
     title: str = Form(None, min_length=0, max_length=128),
     image: UploadFile = None,
     logo: UploadFile = None,
@@ -265,7 +255,6 @@ async def update_project(
     user_id_active = payload.get("uid", None)
 
     # service
-    company_service = CompanyService(db)
     project_service = ProjectService(db)
     role_authority_service = RoleAuthorityService(db)
     user_service = UserService(db)
@@ -285,10 +274,6 @@ async def update_project(
     if not exist_project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     
-    exist_company = company_service.company_repository.read_company(company_id)
-    if not exist_company:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Company not exist")
-    
     if not user_id_filter and exist_project.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
 
@@ -307,7 +292,6 @@ async def update_project(
 
         project_model = Project(
             id=project_id,
-            company_id=company_id,
             title=title,
             is_active=is_active,
         )

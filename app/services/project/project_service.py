@@ -14,8 +14,8 @@ class ProjectService:
         self.static_folder_logo = "static/images/project/logo"
 
     def create_project(self, project: Project, image: UploadFile = None, logo: UploadFile = None, file_extension_image = None, file_extension_logo = None):
-        project.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{project.user_id}-{project.title}") if image else ''
-        project.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, f"{project.user_id}-{project.title}") if logo else ''
+        project.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{project.user.username}-{project.title}") if image else ''
+        project.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, f"{project.user.username}-{project.title}") if logo else ''
 
         return self.project_repository.create_project(project)
 
@@ -29,20 +29,20 @@ class ProjectService:
         file_extension_logo = None,
     ):
         if image and not exist_project.image_url:
-            exist_project.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{project.user_id}-{project.title}")
+            exist_project.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{project.user.username}-{project.title}")
 
         if image and exist_project.image_url:
             file_path = os.path.join(self.static_folder_image, exist_project.image_url)
             delete_file(file_path)
-            exist_project.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{project.user_id}-{project.title}")
+            exist_project.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{project.user.username}-{project.title}")
         
         if logo and not exist_project.logo_url:
-            exist_project.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo,  f"{project.user_id}-{project.title}")
+            exist_project.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo,  f"{project.user.username}-{project.title}")
 
         if logo and exist_project.logo_url:
             file_path = os.path.join(self.static_folder_logo, exist_project.logo_url)
             delete_file(file_path)
-            exist_project.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo,  f"{project.user_id}-{project.title}")
+            exist_project.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo,  f"{project.user.username}-{project.title}")
         
         exist_project.title = project.title
         exist_project.is_active = project.is_active
