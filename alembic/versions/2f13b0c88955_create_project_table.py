@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        'solutions',
+        'projects',
         sa.Column('id', sa.String(36), primary_key=True, server_default=str(uuid.uuid4())),
         sa.Column('user_id', sa.String(36), nullable=True),
         sa.Column('title', sa.String(128), unique=False, nullable=False),
@@ -31,9 +31,9 @@ def upgrade() -> None:
         sa.Column('created_at', sa.DateTime, server_default=sa.func.NOW(), nullable=False),
         sa.Column('updated_at', sa.DateTime, server_default=sa.func.NOW(), onupdate=sa.func.NOW(), nullable=False),
     )
-    op.create_foreign_key("fk_solution_user_id", 'solutions', 'users',
+    op.create_foreign_key("fk_project_user_id", 'projects', 'users',
                         ["user_id"], ["id"], ondelete='CASCADE', onupdate='CASCADE')
 
 def downgrade() -> None:
-    op.drop_table('solutions')
+    op.drop_table('projects')
 

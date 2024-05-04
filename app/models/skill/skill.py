@@ -20,4 +20,4 @@ class Skill(Base):
 
     skill_translations = relationship('SkillTranslation', back_populates='skill', cascade='all, delete')
     skill_mappings = relationship('SkillMapping', back_populates='skill', cascade='all, delete')
-    
+    project_skills = relationship('ProjectSkill', back_populates='skill', cascade='all, delete')

@@ -18,4 +18,5 @@ class Project(Base):
 
     project_translations = relationship('ProjectTranslation', back_populates='project', cascade='all, delete')
     project_attachments = relationship('ProjectAttachment', back_populates='project', cascade='all, delete')
+    project_skills = relationship('ProjectSkill', back_populates='project', cascade='all, delete')
     user = relationship('User', back_populates='projects')

@@ -37,3 +37,4 @@ class RoleAuthorityFeature(EnumParam):
     solution = "solution"
     solution_other = "solution_other"
     project = "project"
+    project_other = "project_other"
