@@ -20,10 +20,3 @@ class EducationTranslationService:
         exist_education_translation.description = education_translation.description
 
         return self.education_translation_repository.update_education_translation(exist_education_translation)
-    
-    def delete_education_translation(self, education_id: str, language_id: str):
-        education_translation = self.education_translation_repository.get_education_translation_by_education_id_and_language_id(education_id, language_id)
-        if not education_translation:
-            raise ValueError("Education Translation not found")
-
-        return self.education_translation_repository.delete_education_translation(education_translation)

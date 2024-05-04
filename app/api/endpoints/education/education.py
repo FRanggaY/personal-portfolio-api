@@ -339,7 +339,7 @@ async def delete_education(
         user_id_filter = None
     
     if not user_id_filter and exist_education.user_id != user_id_filter:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:
         education_service.education_repository.delete_education(exist_education)

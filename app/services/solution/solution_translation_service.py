@@ -18,10 +18,3 @@ class SolutionTranslationService:
         exist_solution_translation.description = solution_translation.description
 
         return self.solution_translation_repository.update_solution_translation(exist_solution_translation)
-    
-    def delete_solution_translation(self, solution_id: str, language_id: str):
-        solution_translation = self.solution_translation_repository.get_solution_translation_by_solution_id_and_language_id(solution_id, language_id)
-        if not solution_translation:
-            raise ValueError("Solution Translation not found")
-
-        return self.solution_translation_repository.delete_solution_translation(solution_translation)

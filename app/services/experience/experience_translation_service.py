@@ -21,10 +21,3 @@ class ExperienceTranslationService:
         exist_experience_translation.description = experience_translation.description
 
         return self.experience_translation_repository.update_experience_translation(exist_experience_translation)
-    
-    def delete_experience_translation(self, experience_id: str, language_id: str):
-        experience_translation = self.experience_translation_repository.get_experience_translation_by_experience_id_and_language_id(experience_id, language_id)
-        if not experience_translation:
-            raise ValueError("Experience Translation not found")
-
-        return self.experience_translation_repository.delete_experience_translation(experience_translation)

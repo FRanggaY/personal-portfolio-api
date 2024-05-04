@@ -181,7 +181,6 @@ def read_experience(
     """
     user_id_active = payload.get("uid", None)
     experience_service = ExperienceService(db)
-
     role_authority_service = RoleAuthorityService(db)
     user_service = UserService(db)
 

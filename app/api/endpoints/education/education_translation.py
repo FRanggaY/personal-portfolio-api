@@ -95,11 +95,25 @@ def read_education_translation(
 
         - should login
     """
+    user_id_active = payload.get("uid", None)
     education_translation_service = EducationTranslationService(db)
+    role_authority_service = RoleAuthorityService(db)
+    user_service = UserService(db)
+
+    user_id_filter = user_id_active
+    
+    user_active = user_service.user_repository.read_user(user_id_active)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.education_other.value, name=RoleAuthorityName.view.value)
+    if role_authority:
+        user_id_filter = None
+
     education_translation = education_translation_service.education_translation_repository.get_education_translation_by_education_id_and_language_id(education_id=education_id, language_id=language_id.value)
 
     if not education_translation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
+    
+    if not user_id_filter and education_translation.education.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
 
     status_code = status.HTTP_200_OK
     data_response = GeneralDataResponse(
@@ -148,11 +162,20 @@ async def update_education_translation(
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to edit")
     
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.education_other.value, name=RoleAuthorityName.edit.value)
+    if role_authority:
+        user_id_filter = None
+
     # validation
     exist_education_translation = education_translation_service.education_translation_repository.get_education_translation_by_education_id_and_language_id(education_id=education_id, language_id=language_id.value)
     if not exist_education_translation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Education Translation not found")
     
+      
+    if not user_id_filter and exist_education_translation.education.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
+
     try:
         education_translation_model = EducationTranslation(
             id=exist_education_translation.id,
@@ -210,8 +233,20 @@ async def delete_education_translation(
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to delete")
 
+    exist_education_translation = education_translation_service.education_translation_repository.get_education_translation_by_education_id_and_language_id(education_id, language_id)
+    if not exist_education_translation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Education not found")
+
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.education_other.value, name=RoleAuthorityName.delete.value)
+    if role_authority:
+        user_id_filter = None
+
+    if not user_id_filter and exist_education_translation.education.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
+
     try:
-        education_translation_service.delete_education_translation(education_id=education_id, language_id=language_id)
+        education_translation_service.education_translation_repository.delete_education_translation(exist_education_translation)
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 

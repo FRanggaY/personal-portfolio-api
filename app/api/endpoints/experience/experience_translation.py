@@ -97,11 +97,23 @@ def read_experience_translation(
 
         - should login
     """
+    user_id_active = payload.get("uid", None)
     experience_translation_service = ExperienceTranslationService(db)
+    role_authority_service = RoleAuthorityService(db)
+    user_service = UserService(db)
+
+    user_active = user_service.user_repository.read_user(user_id_active)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience_other.value, name=RoleAuthorityName.view.value)
+    if role_authority:
+        user_id_filter = None
+
     experience_translation = experience_translation_service.experience_translation_repository.get_experience_translation_by_experience_id_and_language_id(experience_id=experience_id, language_id=language_id.value)
 
     if not experience_translation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
+
+    if not user_id_filter and experience_translation.experience.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
 
     status_code = status.HTTP_200_OK
     data_response = GeneralDataResponse(
@@ -152,11 +164,19 @@ async def update_experience_translation(
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to edit")
     
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience_other.value, name=RoleAuthorityName.edit.value)
+    if role_authority:
+        user_id_filter = None
+
     # validation
     exist_experience_translation = experience_translation_service.experience_translation_repository.get_experience_translation_by_experience_id_and_language_id(experience_id=experience_id, language_id=language_id.value)
     if not exist_experience_translation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Experience Translation not found")
     
+    if not user_id_filter and exist_experience_translation.experience.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
+
     try:
         experience_translation_model = ExperienceTranslation(
             id=exist_experience_translation.id,
@@ -215,8 +235,20 @@ async def delete_experience_translation(
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to delete")
 
+    exist_experience_translation = experience_translation_service.experience_translation_repository.get_experience_translation_by_experience_id_and_language_id(experience_id, language_id)
+    if not exist_experience_translation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Experience not found")
+
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience_other.value, name=RoleAuthorityName.delete.value)
+    if role_authority:
+        user_id_filter = None
+
+    if not user_id_filter and exist_experience_translation.experience.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
+
     try:
-        experience_translation_service.delete_experience_translation(experience_id=experience_id, language_id=language_id)
+        experience_translation_service.experience_translation_repository.delete_experience_translation(exist_experience_translation)
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 
