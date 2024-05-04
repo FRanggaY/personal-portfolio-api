@@ -52,9 +52,15 @@ async def create_solution(
     try:
         if (image):
             await validation_file(file=image)
+        
+        if (logo):
+            await validation_file(file=logo)
 
-        content_type = image.content_type if image else ""
-        file_extension = content_type.split('/')[1] if image else ""
+        content_type_image = image.content_type if image else ""
+        file_extension_image = content_type_image.split('/')[1] if image else ""
+        
+        content_type_logo = logo.content_type if logo else ""
+        file_extension_logo = content_type_logo.split('/')[1] if logo else ""
         
         solution_model = Solution(
             company_id=company_id,
@@ -66,7 +72,8 @@ async def create_solution(
             solution_model,
             image,
             logo,
-            file_extension,
+            file_extension_image,
+            file_extension_logo
         )
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
@@ -288,9 +295,15 @@ async def update_solution(
     try:
         if (image):
             await validation_file(file=image)
+        
+        if (logo):
+            await validation_file(file=logo)
 
-        content_type = image.content_type if image else ""
-        file_extension = content_type.split('/')[1] if image else ""
+        content_type_image = image.content_type if image else ""
+        file_extension_image = content_type_image.split('/')[1] if image else ""
+        
+        content_type_logo = logo.content_type if logo else ""
+        file_extension_logo = content_type_logo.split('/')[1] if logo else ""
 
         solution_model = Solution(
             id=solution_id,
@@ -304,7 +317,8 @@ async def update_solution(
             solution_model,
             image,
             logo,
-            file_extension,
+            file_extension_image,
+            file_extension_logo
         )
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))

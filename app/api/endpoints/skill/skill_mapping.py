@@ -47,7 +47,7 @@ async def create_skill_mapping(
     
     exist_personal_skill = skill_mapping_service.skill_mapping_repository.get_skill_mapping_by_personal(skill_id, user_id_active)
     if exist_personal_skill:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Skill already assign")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Skill already added")
 
     try:
         skill_mapping_model = SkillMapping(

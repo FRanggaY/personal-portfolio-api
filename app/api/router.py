@@ -5,6 +5,7 @@ from .endpoints.school import school, school_translation
 from .endpoints.skill import skill, skill_translation, skill_mapping
 from .endpoints.education import education, education_translation
 from .endpoints.experience import experience, experience_translation
+from .endpoints.solution import solution, solution_translation
 
 router = APIRouter()
 
@@ -28,3 +29,6 @@ router.include_router(education_translation.router, prefix="/education-translati
 
 router.include_router(experience.router, prefix="/experience", tags=["Experience"])
 router.include_router(experience_translation.router, prefix="/experience-translation", tags=["Experience"])
+
+router.include_router(solution.router, prefix="/solution", tags=["Solution"])
+router.include_router(solution_translation.router, prefix="/solution-translation", tags=["Solution"])

@@ -22,8 +22,6 @@ class RoleAuthorityName(EnumParam):
     create = "create"
     edit = "edit"
     delete = "delete"
-    assign = "assign"
-    unassign = "unassign"
 
 class RoleAuthorityFeature(EnumParam):
     role = "role"
