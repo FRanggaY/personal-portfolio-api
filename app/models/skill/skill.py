@@ -19,4 +19,5 @@ class Skill(Base):
     updated_at = Column(DateTime, server_default=func.NOW(), onupdate=func.NOW(), nullable=False)
 
     skill_translations = relationship('SkillTranslation', back_populates='skill', cascade='all, delete')
+    skill_mappings = relationship('SkillMapping', back_populates='skill', cascade='all, delete')
     
