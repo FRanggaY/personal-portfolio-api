@@ -25,6 +25,7 @@ class User(Base):
     role = relationship('Role', back_populates='users')
     educations = relationship('Education', back_populates='user', cascade='all, delete')
     experiences = relationship('Experience', back_populates='user', cascade='all, delete')
+    solutions = relationship('Solution', back_populates='user', cascade='all, delete')
     skill_mappings = relationship('SkillMapping', back_populates='user', cascade='all, delete')
     
 class UserGender(EnumParam):

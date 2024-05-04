@@ -130,7 +130,6 @@ async def update_experience_translation(
     employee_type: str = Form(None, min_length=1, max_length=128),
     location: str = Form(None, min_length=1, max_length=128),
     location_type: str = Form(None, min_length=1, max_length=128),
-    field_of_study: str = Form(None, min_length=1, max_length=128),
     description: str = Form(None, min_length=0, max_length=512),
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
@@ -168,7 +167,6 @@ async def update_experience_translation(
             employee_type=employee_type,
             location=location,
             location_type=location_type,
-            field_of_study=field_of_study,
         )
 
         data = experience_translation_service.update_experience_translation(
