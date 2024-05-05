@@ -143,13 +143,8 @@ def read_projects(
 
     datas = []
     for project in projects:
-        company = {
-            'id': project.company.id,
-            'name': project.company.name,
-        } if project.company else None
         datas.append({
             'id': project.id,
-            'name': company,
             'title': project.title,
             'is_active': project.is_active,
             'created_at': str(project.created_at),
@@ -209,11 +204,6 @@ def read_project(
 
     if not user_id_filter and project.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
-   
-    company = {
-        'id': project.company.id,
-        'name': project.company.name,
-    } if project.company else None
 
     status_code = status.HTTP_200_OK
     data_response = GeneralDataResponse(
@@ -221,7 +211,6 @@ def read_project(
         status="OK",
         data={
             'id': project.id,
-            'name': company,
             'title': project.title,
             'is_active': project.is_active,
             'created_at': str(project.created_at),

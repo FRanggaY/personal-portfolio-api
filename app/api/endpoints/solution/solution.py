@@ -8,7 +8,6 @@ from app.models.role_authority import RoleAuthorityFeature, RoleAuthorityName
 from app.models.solution.solution import Solution
 from app.services.role_authority_service import RoleAuthorityService
 from app.services.solution.solution_service import SolutionService
-from app.services.company.company_service import CompanyService
 from app.services.user_service import UserService
 from app.utils.authentication import Authentication
 from app.utils.handling_file import validation_file
@@ -144,13 +143,8 @@ def read_solutions(
 
     datas = []
     for solution in solutions:
-        company = {
-            'id': solution.company.id,
-            'name': solution.company.name,
-        } if solution.company else None
         datas.append({
             'id': solution.id,
-            'name': company,
             'title': solution.title,
             'is_active': solution.is_active,
             'created_at': str(solution.created_at),
@@ -210,11 +204,6 @@ def read_solution(
 
     if not user_id_filter and solution.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
-   
-    company = {
-        'id': solution.company.id,
-        'name': solution.company.name,
-    } if solution.company else None
 
     status_code = status.HTTP_200_OK
     data_response = GeneralDataResponse(
@@ -222,7 +211,6 @@ def read_solution(
         status="OK",
         data={
             'id': solution.id,
-            'name': company,
             'title': solution.title,
             'is_active': solution.is_active,
             'created_at': str(solution.created_at),

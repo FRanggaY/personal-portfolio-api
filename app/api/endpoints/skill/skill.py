@@ -40,7 +40,7 @@ async def create_skill(
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill.value, name=RoleAuthorityName.create.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_other.value, name=RoleAuthorityName.create.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to create")
 
@@ -235,7 +235,7 @@ async def update_skill(
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill.value, name=RoleAuthorityName.edit.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_other.value, name=RoleAuthorityName.edit.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to edit")
     
@@ -311,7 +311,7 @@ async def delete_skill(
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill.value, name=RoleAuthorityName.delete.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_other.value, name=RoleAuthorityName.delete.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to delete")
 
@@ -352,8 +352,8 @@ async def read_skill_resource(
     user_active = user_service.user_repository.read_user(user_id_active)
 
     # list
-    role_authorities = role_authority_service.role_authority_repository.read_role_authorities(role_id=user_active.role_id, feature=[RoleAuthorityFeature.skill.value, RoleAuthorityFeature.skill_other.value])
-    role_authority_list = [role_authority.name for role_authority in role_authorities] if role_authorities else []
+    role_authorities = role_authority_service.role_authority_repository.read_role_authorities(role_id=user_active.role_id, feature=[RoleAuthorityFeature.skill_other.value, RoleAuthorityFeature.skill.value])
+    role_authority_list = [f"{role_authority.name}_{role_authority.feature}" for role_authority in role_authorities] if role_authorities else []
 
     status_code = status.HTTP_200_OK
     data_response = GeneralDataResponse(

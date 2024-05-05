@@ -139,7 +139,7 @@ def read_skill_mappings(
         } if skill_mapping.skill else None
         datas.append({
             'id': skill_mapping.id,
-            'name': skill,
+            'skill': skill,
             'is_active': skill_mapping.is_active,
             'created_at': str(skill_mapping.created_at),
             'updated_at': str(skill_mapping.updated_at),
@@ -205,7 +205,7 @@ def read_skill_mapping(
         status="OK",
         data={
             'id': skill_mapping.id,
-            'name': skill,
+            'skill': skill,
             'is_active': skill_mapping.is_active,
             'created_at': str(skill_mapping.created_at),
             'updated_at': str(skill_mapping.updated_at),
