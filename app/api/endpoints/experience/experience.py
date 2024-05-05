@@ -141,7 +141,7 @@ def read_experiences(
         } if experience.company else None
         datas.append({
             'id': experience.id,
-            'name': company,
+            'company': company,
             'title': experience.title,
             'is_active': experience.is_active,
             'started_at': str(experience.started_at),
@@ -210,7 +210,7 @@ def read_experience(
         status="OK",
         data={
             'id': experience.id,
-            'name': company,
+            'company': company,
             'title': experience.title,
             'is_active': experience.is_active,
             'started_at': str(experience.started_at),
@@ -343,7 +343,7 @@ async def delete_experience(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:
-        experience_service.experience_repository.delete_experience(experience_id)
+        experience_service.experience_repository.delete_experience(exist_experience)
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
 

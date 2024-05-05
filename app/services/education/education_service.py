@@ -14,6 +14,7 @@ class EducationService:
         education: Education,
     ):
         
+        exist_education.school_id = education.school_id
         exist_education.title = education.title
         exist_education.started_at = education.started_at
         exist_education.finished_at = education.finished_at

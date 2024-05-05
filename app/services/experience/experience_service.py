@@ -14,6 +14,7 @@ class ExperienceService:
         experience: Experience,
     ):
         
+        exist_experience.company_id = experience.company_id
         exist_experience.title = experience.title
         exist_experience.started_at = experience.started_at
         exist_experience.finished_at = experience.finished_at

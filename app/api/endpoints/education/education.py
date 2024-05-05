@@ -140,7 +140,7 @@ def read_educations(
         } if education.school else None
         datas.append({
             'id': education.id,
-            'name': school,
+            'school': school,
             'title': education.title,
             'is_active': education.is_active,
             'started_at': str(education.started_at),
@@ -209,7 +209,7 @@ def read_education(
         status="OK",
         data={
             'id': education.id,
-            'name': school,
+            'school': school,
             'title': education.title,
             'is_active': education.is_active,
             'started_at': str(education.started_at),
