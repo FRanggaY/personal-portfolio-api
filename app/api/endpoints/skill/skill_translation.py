@@ -150,7 +150,7 @@ async def update_skill_translation(
             id=exist_skill_translation.id,
             language_id=language_id.value,
             skill_id=skill_id,
-            code=description,
+            description=description,
             name=name,
         )
 
