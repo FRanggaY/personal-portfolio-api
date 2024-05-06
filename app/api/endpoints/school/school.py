@@ -148,7 +148,7 @@ def read_schools(
             'updated_at': str(school.updated_at),
             'image_url': f"{base_url}{school_service.static_folder_image}/{school.image_url}" if school.image_url else None,
             'logo_url': f"{base_url}{school_service.static_folder_logo}/{school.logo_url}" if school.logo_url else None,
-            'website_url': str(school.website_url),
+            'website_url': str(school.website_url) if school.website_url else None,
         })
 
     status_code = status.HTTP_200_OK
@@ -198,7 +198,7 @@ def read_school(
             'updated_at': str(school.updated_at),
             'image_url': f"{base_url}{school_service.static_folder_image}/{school.image_url}" if school.image_url else None,
             'logo_url': f"{base_url}{school_service.static_folder_logo}/{school.logo_url}" if school.logo_url else None,
-            'website_url': str(school.website_url),
+            'website_url': str(school.website_url) if school.website_url else None,
         },
     )
     response = JSONResponse(content=data_response.model_dump(), status_code=status_code)

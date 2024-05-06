@@ -151,7 +151,7 @@ def read_skills(
             'updated_at': str(skill.updated_at),
             'image_url': f"{base_url}{skill_service.static_folder_image}/{skill.image_url}" if skill.image_url else None,
             'logo_url': f"{base_url}{skill_service.static_folder_logo}/{skill.logo_url}" if skill.logo_url else None,
-            'website_url': str(skill.website_url),
+            'website_url': str(skill.website_url) if skill.website_url else None,
         })
 
     status_code = status.HTTP_200_OK
@@ -202,7 +202,7 @@ def read_skill(
             'updated_at': str(skill.updated_at),
             'image_url': f"{base_url}{skill_service.static_folder_image}/{skill.image_url}" if skill.image_url else None,
             'logo_url': f"{base_url}{skill_service.static_folder_logo}/{skill.logo_url}" if skill.logo_url else None,
-            'website_url': str(skill.website_url),
+            'website_url': str(skill.website_url) if skill.website_url else None,
         },
     )
     response = JSONResponse(content=data_response.model_dump(), status_code=status_code)

@@ -148,7 +148,7 @@ def read_companies(
             'updated_at': str(company.updated_at),
             'image_url': f"{base_url}{company_service.static_folder_image}/{company.image_url}" if company.image_url else None,
             'logo_url': f"{base_url}{company_service.static_folder_logo}/{company.logo_url}" if company.logo_url else None,
-            'website_url': str(company.website_url),
+            'website_url': str(company.website_url) if company.website_url else None,
         })
 
     status_code = status.HTTP_200_OK
@@ -198,7 +198,7 @@ def read_company(
             'updated_at': str(company.updated_at),
             'image_url': f"{base_url}{company_service.static_folder_image}/{company.image_url}" if company.image_url else None,
             'logo_url': f"{base_url}{company_service.static_folder_logo}/{company.logo_url}" if company.logo_url else None,
-            'website_url': str(company.website_url),
+            'website_url': str(company.website_url) if company.website_url else None,
         },
     )
     response = JSONResponse(content=data_response.model_dump(), status_code=status_code)
