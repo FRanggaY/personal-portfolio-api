@@ -202,7 +202,7 @@ def read_project(
     if not project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
-    if not user_id_filter and project.user_id != user_id_filter:
+    if user_id_filter is not None and project.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
 
     status_code = status.HTTP_200_OK
@@ -263,7 +263,7 @@ async def update_project(
     if not exist_project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     
-    if not user_id_filter and exist_project.user_id != user_id_filter:
+    if user_id_filter is not None and exist_project.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
 
     try:
@@ -346,7 +346,7 @@ async def delete_project(
     if role_authority:
         user_id_filter = None
     
-    if not user_id_filter and exist_project.user_id != user_id_filter:
+    if user_id_filter is not None and exist_project.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:

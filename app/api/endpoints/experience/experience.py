@@ -196,7 +196,7 @@ def read_experience(
     if not experience:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
-    if not user_id_filter and experience.user_id != user_id_filter:
+    if user_id_filter is not None and experience.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
    
     company = {
@@ -269,7 +269,7 @@ async def update_experience(
     if not exist_company:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Company not exist")
     
-    if not user_id_filter and exist_experience.user_id != user_id_filter:
+    if user_id_filter is not None and exist_experience.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
 
     try:
@@ -339,7 +339,7 @@ async def delete_experience(
     if role_authority:
         user_id_filter = None
     
-    if not user_id_filter and exist_experience.user_id != user_id_filter:
+    if user_id_filter is not None and exist_experience.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:

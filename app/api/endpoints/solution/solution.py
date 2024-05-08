@@ -202,7 +202,7 @@ def read_solution(
     if not solution:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
-    if not user_id_filter and solution.user_id != user_id_filter:
+    if user_id_filter is not None and solution.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
 
     status_code = status.HTTP_200_OK
@@ -263,7 +263,7 @@ async def update_solution(
     if not exist_solution:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Solution not found")
     
-    if not user_id_filter and exist_solution.user_id != user_id_filter:
+    if user_id_filter is not None and exist_solution.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
 
     try:
@@ -346,7 +346,7 @@ async def delete_solution(
     if role_authority:
         user_id_filter = None
     
-    if not user_id_filter and exist_solution.user_id != user_id_filter:
+    if user_id_filter is not None and exist_solution.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:

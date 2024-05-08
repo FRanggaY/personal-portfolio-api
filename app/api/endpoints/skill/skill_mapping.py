@@ -191,7 +191,7 @@ def read_skill_mapping(
     if not skill_mapping:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
-    if not user_id_filter and skill_mapping.user_id != user_id_filter:
+    if user_id_filter is not None and skill_mapping.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
    
     skill = {
@@ -252,7 +252,7 @@ async def update_skill_mapping(
     if role_authority:
         user_id_filter = None
     
-    if not user_id_filter and exist_skill_mapping.user_id != user_id_filter:
+    if user_id_filter is not None and exist_skill_mapping.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
 
     try:
@@ -315,7 +315,7 @@ async def delete_skill_mapping(
     if role_authority:
         user_id_filter = None
 
-    if not user_id_filter and exist_skill_mapping.user_id != user_id_filter:
+    if user_id_filter is not None and exist_skill_mapping.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:

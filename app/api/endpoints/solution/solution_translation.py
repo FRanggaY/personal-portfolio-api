@@ -42,6 +42,11 @@ async def create_solution_translation(
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to create")
 
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.solution_other.value, name=RoleAuthorityName.create.value)
+    if role_authority:
+        user_id_filter = None
+
     language_id = language_id.value
 
     # validation
@@ -49,6 +54,9 @@ async def create_solution_translation(
     if not exist_solution:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Solution not found")
     
+    if user_id_filter is not None and exist_solution.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to create")
+
     exist_data = solution_translation_service.solution_translation_repository.get_solution_translation_by_solution_id_and_language_id(solution_id=solution_id, language_id=language_id)
     if exist_data:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Solution Translation already exist")
@@ -108,7 +116,7 @@ def read_solution_translation(
     if not solution_translation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
-    if not user_id_filter and solution_translation.solution.user_id != user_id_filter:
+    if user_id_filter is not None and solution_translation.solution.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
 
     status_code = status.HTTP_200_OK
@@ -164,7 +172,7 @@ async def update_solution_translation(
     if not exist_solution_translation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Solution Translation not found")
     
-    if not user_id_filter and exist_solution_translation.solution.user_id != user_id_filter:
+    if user_id_filter is not None and exist_solution_translation.solution.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
 
     try:
@@ -231,7 +239,7 @@ async def delete_solution_translation(
     if role_authority:
         user_id_filter = None
 
-    if not user_id_filter and exist_solution_translation.solution.user_id != user_id_filter:
+    if user_id_filter is not None and exist_solution_translation.solution.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:

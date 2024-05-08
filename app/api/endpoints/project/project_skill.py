@@ -19,6 +19,7 @@ router = APIRouter()
 async def create_project_skill(
     project_id: str = Form(..., min_length=1, max_length=36),
     skill_id: str = Form(..., min_length=1, max_length=36),
+    is_active: bool = Form(default=True),
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
@@ -42,10 +43,18 @@ async def create_project_skill(
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to create")
 
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project_other.value, name=RoleAuthorityName.create.value)
+    if role_authority:
+        user_id_filter = None
+
     # validation
     exist_project = project_service.project_repository.read_project(project_id)
     if not exist_project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    
+    if user_id_filter is not None and exist_project.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to create")
     
     exist_skill = skill_service.skill_repository.read_skill(skill_id)
     if not exist_skill:
@@ -59,6 +68,7 @@ async def create_project_skill(
         project_skill_model = ProjectSkill(
             skill_id=skill_id,
             project_id=project_id,
+            is_active=is_active,
         )
 
         data = project_skill_service.project_skill_repository.create_project_skill(project_skill_model)
@@ -97,23 +107,9 @@ def read_project_skills(
         Read All ProjectSkill
 
         - need login
-
-        - when has authority create other it show project_skill information
-        - when no has authority, it only show project_skill it self
     """
-    user_id_active = payload.get("uid", None)
     project_skill_service = ProjectSkillService(db)
     skill_service = SkillService(db)
-
-    role_authority_service = RoleAuthorityService(db)
-    user_service = UserService(db)
-
-    user_id_filter = user_id_active
-    
-    user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project.value, name=RoleAuthorityName.create.value)
-    if role_authority:
-        user_id_filter = None
 
     base_url = str(request.base_url) if request else ""
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
@@ -125,7 +121,6 @@ def read_project_skills(
         sort_order=sort_order, 
         custom_filters=custom_filters,
         is_active=is_active,
-        user_id=user_id_filter,
         project_id=project_id
     )
 
@@ -135,7 +130,6 @@ def read_project_skills(
     count = project_skill_service.project_skill_repository.count_project_skills(
         custom_filters=custom_filters,
         is_active=is_active,
-        user_id=user_id_filter,
         project_id=project_id
     )
     total_pages = get_total_pages(size, count)
@@ -143,16 +137,24 @@ def read_project_skills(
 
     datas = []
     for project_skill in project_skills:
+        image_url = f"{base_url}{skill_service.static_folder_image}/{project_skill.skill.image_url}" if project_skill.skill.image_url else None
+        logo_url = f"{base_url}{skill_service.static_folder_logo}/{project_skill.skill.logo_url}" if project_skill.skill.logo_url else None
         skill = {
             'id': project_skill.skill.id,
             'name': project_skill.skill.name,
             'category': project_skill.skill.category,
-            'image_url': f"{base_url}{skill_service.static_folder_image}/{skill.image_url}" if skill.image_url else None,
-            'logo_url': f"{base_url}{skill_service.static_folder_logo}/{skill.logo_url}" if skill.logo_url else None,
+            'image_url': image_url,
+            'logo_url': logo_url,
         } if project_skill.skill else None
+        project = {
+            'id': project_skill.project.id,
+            'title': project_skill.project.title,
+        } if project_skill.project else None
         datas.append({
             'id': project_skill.id,
             'skill': skill,
+            'project': project,
+            'is_active': project_skill.is_active,
             'created_at': str(project_skill.created_at),
             'updated_at': str(project_skill.updated_at),
         })
@@ -213,7 +215,7 @@ async def update_project_skill(
     if not exist_project_skill:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project Skill not found")
     
-    if not user_id_filter and exist_project_skill.project.user_id != user_id_filter:
+    if user_id_filter is not None and exist_project_skill.project.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
 
     try:
@@ -278,7 +280,7 @@ async def delete_project_skill(
     if role_authority:
         user_id_filter = None
 
-    if not user_id_filter and exist_project_skill.project.user_id != user_id_filter:
+    if user_id_filter is not None and exist_project_skill.project.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:

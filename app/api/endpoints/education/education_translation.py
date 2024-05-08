@@ -44,6 +44,11 @@ async def create_education_translation(
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to create")
 
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.education_other.value, name=RoleAuthorityName.create.value)
+    if role_authority:
+        user_id_filter = None
+
     language_id = language_id.value
 
     # validation
@@ -51,6 +56,9 @@ async def create_education_translation(
     if not exist_education:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Education not found")
     
+    if user_id_filter is not None and exist_education.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to create")
+
     exist_data = education_translation_service.education_translation_repository.get_education_translation_by_education_id_and_language_id(education_id=education_id, language_id=language_id)
     if exist_data:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Education Translation already exist")
@@ -112,7 +120,7 @@ def read_education_translation(
     if not education_translation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
     
-    if not user_id_filter and education_translation.education.user_id != user_id_filter:
+    if user_id_filter is not None and education_translation.education.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
 
     status_code = status.HTTP_200_OK
@@ -173,7 +181,7 @@ async def update_education_translation(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Education Translation not found")
     
       
-    if not user_id_filter and exist_education_translation.education.user_id != user_id_filter:
+    if user_id_filter is not None and exist_education_translation.education.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
 
     try:
@@ -242,7 +250,7 @@ async def delete_education_translation(
     if role_authority:
         user_id_filter = None
 
-    if not user_id_filter and exist_education_translation.education.user_id != user_id_filter:
+    if user_id_filter is not None and exist_education_translation.education.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:

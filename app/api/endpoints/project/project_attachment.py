@@ -46,11 +46,19 @@ async def create_project_attachment(
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to create")
 
+    user_id_filter = user_id_active
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project_other.value, name=RoleAuthorityName.create.value)
+    if role_authority:
+        user_id_filter = None
+
     # validation
     exist_project = project_service.project_repository.read_project(project_id)
     if not exist_project:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Company not exist")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     
+    if user_id_filter is not None and exist_project.user_id != user_id_filter:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to create")
+
     try:
         if (image):
             await validation_file(file=image)
@@ -107,22 +115,8 @@ def read_project_attachments(
         Read All ProjectAttachment
 
         - need login
-
-        - when has authority create other it show project_attachment information
-        - when no has authority, it only show project_attachment it self
     """
-    user_id_active = payload.get("uid", None)
     project_attachment_service = ProjectAttachmentService(db)
-
-    role_authority_service = RoleAuthorityService(db)
-    user_service = UserService(db)
-
-    user_id_filter = user_id_active
-    
-    user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.project.value, name=RoleAuthorityName.create.value)
-    if role_authority:
-        user_id_filter = None
 
     base_url = str(request.base_url) if request else ""
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
@@ -134,7 +128,6 @@ def read_project_attachments(
         sort_order=sort_order, 
         custom_filters=custom_filters,
         is_active=is_active,
-        user_id=user_id_filter,
         project_id=project_id
     )
 
@@ -144,7 +137,6 @@ def read_project_attachments(
     count = project_attachment_service.project_attachment_repository.count_project_attachments(
         custom_filters=custom_filters,
         is_active=is_active,
-        user_id=user_id_filter,
         project_id=project_id
     )
     total_pages = get_total_pages(size, count)
@@ -213,7 +205,7 @@ def read_project_attachment(
     if not project_attachment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
-    if not user_id_filter and project_attachment.user_id != user_id_filter:
+    if user_id_filter is not None and project_attachment.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
 
     status_code = status.HTTP_200_OK
@@ -284,7 +276,7 @@ async def update_project_attachment(
     if not exist_project:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Company not exist")
     
-    if not user_id_filter and exist_project_attachment.project.user_id != user_id_filter:
+    if user_id_filter is not None and exist_project_attachment.project.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
 
     try:
@@ -363,7 +355,7 @@ async def delete_project_attachment(
     if role_authority:
         user_id_filter = None
     
-    if not user_id_filter and exist_project_attachment.project.user_id != user_id_filter:
+    if user_id_filter is not None and exist_project_attachment.project.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:

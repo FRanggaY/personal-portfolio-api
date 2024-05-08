@@ -195,7 +195,7 @@ def read_education(
     if not education:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
-    if not user_id_filter and education.user_id != user_id_filter:
+    if user_id_filter is not None and education.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to read")
    
     school = {
@@ -268,7 +268,7 @@ async def update_education(
     if not exist_school:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="School not exist")
     
-    if not user_id_filter and exist_education.user_id != user_id_filter:
+    if user_id_filter is not None and exist_education.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to update")
 
     try:
@@ -338,7 +338,7 @@ async def delete_education(
     if role_authority:
         user_id_filter = None
     
-    if not user_id_filter and exist_education.user_id != user_id_filter:
+    if user_id_filter is not None and exist_education.user_id != user_id_filter:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to delete")
 
     try:
