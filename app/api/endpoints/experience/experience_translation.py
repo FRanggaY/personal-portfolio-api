@@ -102,6 +102,8 @@ def read_experience_translation(
     role_authority_service = RoleAuthorityService(db)
     user_service = UserService(db)
 
+    user_id_filter = user_id_active
+
     user_active = user_service.user_repository.read_user(user_id_active)
     role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience_other.value, name=RoleAuthorityName.view.value)
     if role_authority:
@@ -182,7 +184,7 @@ async def update_experience_translation(
             id=exist_experience_translation.id,
             language_id=language_id.value,
             experience_id=experience_id,
-            code=description,
+            description=description,
             title=title,
             employee_type=employee_type,
             location=location,

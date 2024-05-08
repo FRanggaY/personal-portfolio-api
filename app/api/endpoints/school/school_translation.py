@@ -154,8 +154,8 @@ async def update_school_translation(
             id=exist_school_translation.id,
             language_id=language_id.value,
             school_id=school_id,
-            code=description,
-            email=address,
+            description=description,
+            address=address,
             name=name,
         )
 

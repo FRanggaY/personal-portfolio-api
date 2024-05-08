@@ -181,7 +181,7 @@ async def update_education_translation(
             id=exist_education_translation.id,
             language_id=language_id.value,
             education_id=education_id,
-            code=description,
+            description=description,
             title=title,
             degree=degree,
             field_of_study=field_of_study,

@@ -96,13 +96,15 @@ def read_solution_translation(
     role_authority_service = RoleAuthorityService(db)
     user_service = UserService(db)
 
+    user_id_filter = user_id_active
+
     user_active = user_service.user_repository.read_user(user_id_active)
     role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.solution_other.value, name=RoleAuthorityName.view.value)
     if role_authority:
         user_id_filter = None
 
     solution_translation = solution_translation_service.solution_translation_repository.get_solution_translation_by_solution_id_and_language_id(solution_id=solution_id, language_id=language_id.value)
-
+    
     if not solution_translation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Data not found")
 
@@ -170,7 +172,7 @@ async def update_solution_translation(
             id=exist_solution_translation.id,
             language_id=language_id.value,
             solution_id=solution_id,
-            code=description,
+            description=description,
             title=title,
         )
 

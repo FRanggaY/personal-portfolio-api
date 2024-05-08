@@ -154,8 +154,8 @@ async def update_company_translation(
             id=exist_company_translation.id,
             language_id=language_id.value,
             company_id=company_id,
-            code=description,
-            email=address,
+            description=description,
+            address=address,
             name=name,
         )
 
