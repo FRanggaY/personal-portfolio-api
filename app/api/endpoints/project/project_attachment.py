@@ -20,8 +20,8 @@ router = APIRouter()
 async def create_project_attachment(
     project_id: str = Form(..., min_length=1, max_length=36),
     title: str = Form(..., min_length=1, max_length=128),
-    description: str = Form(..., min_length=1, max_length=512),
-    website_url: str = Form(..., min_length=1, max_length=512),
+    description: str = Form(None, min_length=0, max_length=512),
+    website_url: str = Form(None, min_length=0, max_length=512),
     category: str = Form(..., min_length=1, max_length=512),
     image: UploadFile = None,
     db: Session = Depends(get_db), 
@@ -68,7 +68,6 @@ async def create_project_attachment(
         
         project_attachment_model = ProjectAttachment(
             project_id=project_id,
-            user_id=user_id_active,
             title=title,
             description=description,
             website_url=website_url,
@@ -77,6 +76,7 @@ async def create_project_attachment(
 
         data = project_attachment_service.create_project_attachment(
             project_attachment_model,
+            exist_project,
             image,
             file_extension_image,
         )
@@ -148,8 +148,8 @@ def read_project_attachments(
             'id': project_attachment.id,
             'title': project_attachment.title,
             'is_active': project_attachment.is_active,
-            'description': project_attachment.description,
-            'website_url': project_attachment.website_url,
+            'description': project_attachment.description if project_attachment.description else None,
+            'website_url': project_attachment.website_url if project_attachment.website_url else None,
             'category': project_attachment.category,
             'created_at': str(project_attachment.created_at),
             'updated_at': str(project_attachment.updated_at),
@@ -216,8 +216,8 @@ def read_project_attachment(
             'id': project_attachment.id,
             'title': project_attachment.title,
             'is_active': project_attachment.is_active,
-            'description': project_attachment.description,
-            'website_url': project_attachment.website_url,
+            'description': project_attachment.description if project_attachment.description else None,
+            'website_url': project_attachment.website_url if project_attachment.website_url else None,
             'category': project_attachment.category,
             'created_at': str(project_attachment.created_at),
             'updated_at': str(project_attachment.updated_at),
@@ -299,6 +299,7 @@ async def update_project_attachment(
         data = project_attachment_service.update_project_attachment(
             exist_project_attachment,
             project_attachment_model,
+            exist_project,
             image,
             file_extension_image,
         )
