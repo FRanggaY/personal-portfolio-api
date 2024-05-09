@@ -19,6 +19,13 @@ class ProjectService:
 
         return self.project_repository.create_project(project)
 
+    def validation_unique_based_other_project(self, exist_project: Project, project: Project):
+        if project.slug:
+            exist_slug = self.project_repository.get_project_by_slug(project.slug)
+            if exist_slug and project.slug != exist_project.slug and (exist_project.user_id == exist_slug.user_id):
+                raise ValueError('Slug already used in other project')
+            exist_project.slug = project.slug
+
     def update_project(
         self, 
         exist_project: Project, 
@@ -28,6 +35,8 @@ class ProjectService:
         file_extension_image = None,
         file_extension_logo = None,
     ):
+        self.validation_unique_based_other_project(exist_project, project)
+
         if image and not exist_project.image_url:
             exist_project.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{project.user.username}-{project.title}")
 

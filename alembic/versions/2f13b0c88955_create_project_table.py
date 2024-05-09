@@ -25,6 +25,7 @@ def upgrade() -> None:
         sa.Column('id', sa.String(36), primary_key=True, server_default=str(uuid.uuid4())),
         sa.Column('user_id', sa.String(36), nullable=True),
         sa.Column('title', sa.String(128), unique=False, nullable=False),
+        sa.Column('slug', sa.String(256), unique=False, nullable=False),
         sa.Column('image_url', sa.String(512), unique=False, nullable=True),
         sa.Column('logo_url', sa.String(512), unique=False, nullable=True),
         sa.Column('is_active', sa.Boolean, default=True),

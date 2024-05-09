@@ -18,6 +18,7 @@ router = APIRouter()
 @router.post("", response_model=GeneralDataResponse, status_code=status.HTTP_201_CREATED)
 async def create_project(
     title: str = Form(..., min_length=1, max_length=128),
+    slug: str = Form(..., min_length=1, max_length=256),
     image: UploadFile = None,
     logo: UploadFile = None,
     db: Session = Depends(get_db), 
@@ -41,6 +42,10 @@ async def create_project(
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to create")
     
+    exist_slug = project_service.project_repository.get_project_by_slug(slug)
+    if exist_slug and exist_slug.user_id == user_id_active:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Slug already exist")
+
     try:
         if (image):
             await validation_file(file=image)
@@ -57,6 +62,7 @@ async def create_project(
         project_model = Project(
             user_id=user_id_active,
             title=title,
+            slug=slug,
         )
 
         data = project_service.create_project(
@@ -147,6 +153,7 @@ def read_projects(
             'id': project.id,
             'title': project.title,
             'is_active': project.is_active,
+            'slug': project.slug,
             'created_at': str(project.created_at),
             'updated_at': str(project.updated_at),
             'image_url': f"{base_url}{project_service.static_folder_image}/{project.image_url}" if project.image_url else None,
@@ -212,6 +219,7 @@ def read_project(
         data={
             'id': project.id,
             'title': project.title,
+            'slug': project.slug,
             'is_active': project.is_active,
             'created_at': str(project.created_at),
             'updated_at': str(project.updated_at),
@@ -226,6 +234,7 @@ def read_project(
 async def update_project(
     project_id: str,
     title: str = Form(None, min_length=0, max_length=128),
+    slug: str = Form(None, min_length=0, max_length=256),
     image: UploadFile = None,
     logo: UploadFile = None,
     is_active: bool = Form(default=True),
@@ -283,6 +292,7 @@ async def update_project(
             id=project_id,
             title=title,
             is_active=is_active,
+            slug=slug,
         )
 
         data = project_service.update_project(

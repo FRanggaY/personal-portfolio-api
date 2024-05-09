@@ -9,6 +9,7 @@ class Project(Base):
     id = Column(String, primary_key=True, nullable=False)
     user_id = Column(ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
     title = Column(String(128), unique=False, nullable=False)
+    slug = Column(String(256), unique=False, nullable=False)
     image_url = Column(String(512), unique=False, nullable=True)
     logo_url = Column(String(512), unique=False, nullable=True)
     is_active = Column(Boolean, default=True)

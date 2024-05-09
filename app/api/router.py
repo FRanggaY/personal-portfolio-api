@@ -7,8 +7,16 @@ from .endpoints.education import education, education_translation
 from .endpoints.experience import experience, experience_translation
 from .endpoints.solution import solution, solution_translation
 from .endpoints.project import project, project_translation, project_attachment, project_skill
+from .endpoints.public_profile import public_profile, public_profile_education, public_profile_experience, public_profile_skill, public_profile_solution, public_profile_project
 
 router = APIRouter()
+
+router.include_router(public_profile.router, prefix="/public-profile", tags=["Public Profile"])
+router.include_router(public_profile_education.router, prefix="/public-profile", tags=["Public Profile"])
+router.include_router(public_profile_experience.router, prefix="/public-profile", tags=["Public Profile"])
+router.include_router(public_profile_skill.router, prefix="/public-profile", tags=["Public Profile"])
+router.include_router(public_profile_solution.router, prefix="/public-profile", tags=["Public Profile"])
+router.include_router(public_profile_project.router, prefix="/public-profile", tags=["Public Profile"])
 
 router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 

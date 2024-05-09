@@ -2,6 +2,7 @@ import uuid
 from sqlalchemy import asc, desc, or_
 from sqlalchemy.orm import Session
 from app.models.project.project_skill import ProjectSkill
+from app.models.skill.skill_translation import SkillTranslation
 
 class ProjectSkillRepository:
     def __init__(self, db: Session):
@@ -16,6 +17,21 @@ class ProjectSkillRepository:
 
     def get_project_skill_by_project_id_and_skill_id(self, project_id: str, skill_id: str) -> ProjectSkill:
         return self.db.query(ProjectSkill).filter(ProjectSkill.project_id == project_id, ProjectSkill.skill_id == skill_id).first()
+
+    def get_project_skill_by_project_id_and_language_id(
+        self, 
+        project_id: str,
+        language_id: str,
+    ) -> list[SkillTranslation]:
+        query = self.db.query(SkillTranslation) \
+            .join(ProjectSkill, SkillTranslation.skill_id == ProjectSkill.skill_id)
+        
+        query = query.filter(ProjectSkill.project_id == project_id)
+        query = query.filter(SkillTranslation.language_id == language_id)
+
+        query = query.filter(ProjectSkill.is_active == True)
+        
+        return query.all()
 
     def read_project_skills(
         self, 

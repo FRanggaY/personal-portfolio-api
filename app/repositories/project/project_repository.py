@@ -15,6 +15,14 @@ class ProjectRepository:
         self.db.refresh(project)
         return project
     
+    def get_project_by_slug(self, slug: str) -> Project:
+        project = self.db.query(Project).filter(Project.slug == slug).first()
+        return project
+    
+    def get_project_by_user_id_and_slug(self, user_id: str, slug: str) -> Project:
+        project = self.db.query(Project).filter(Project.user_id == user_id, Project.slug == slug).first()
+        return project
+
     def read_projects(
         self, 
         sort_by: str = None, 
