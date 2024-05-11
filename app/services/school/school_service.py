@@ -47,20 +47,20 @@ class SchoolService:
         exist_school.website_url = school.website_url
         exist_school.is_active = school.is_active
 
-        if image and not exist_school.image_url:
-            exist_school.image_url = upload_file(image, self.static_folder_image, file_extension_image, school.code)
-
         if image and exist_school.image_url:
             file_path = os.path.join(self.static_folder_image, exist_school.image_url)
             delete_file(file_path)
             exist_school.image_url = upload_file(image, self.static_folder_image, file_extension_image, school.code)
-        
-        if logo and not exist_school.logo_url:
-            exist_school.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, school.code)
+
+        if image and not exist_school.image_url:
+            exist_school.image_url = upload_file(image, self.static_folder_image, file_extension_image, school.code)
 
         if logo and exist_school.logo_url:
             file_path = os.path.join(self.static_folder_logo, exist_school.logo_url)
             delete_file(file_path)
+            exist_school.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, school.code)
+
+        if logo and not exist_school.logo_url:
             exist_school.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, school.code)
 
         return self.school_repository.update_school(exist_school)

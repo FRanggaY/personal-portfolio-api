@@ -47,21 +47,22 @@ class CompanyService:
         exist_company.website_url = company.website_url
         exist_company.is_active = company.is_active
 
-        if image and not exist_company.image_url:
-            exist_company.image_url = upload_file(image, self.static_folder_image, file_extension_image, company.code)
-
         if image and exist_company.image_url:
             file_path = os.path.join(self.static_folder_image, exist_company.image_url)
             delete_file(file_path)
             exist_company.image_url = upload_file(image, self.static_folder_image, file_extension_image, company.code)
         
-        if logo and not exist_company.logo_url:
-            exist_company.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, company.code)
+        if image and not exist_company.image_url:
+            exist_company.image_url = upload_file(image, self.static_folder_image, file_extension_image, company.code)
 
         if logo and exist_company.logo_url:
             file_path = os.path.join(self.static_folder_logo, exist_company.logo_url)
             delete_file(file_path)
             exist_company.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, company.code)
+
+        if logo and not exist_company.logo_url:
+            exist_company.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, company.code)
+
 
         return self.company_repository.update_company(exist_company)
     

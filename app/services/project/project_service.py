@@ -38,20 +38,20 @@ class ProjectService:
     ):
         self.validation_unique_based_other_project(exist_project, project)
 
-        if image and not exist_project.image_url:
-            exist_project.image_url = upload_file(image, self.static_folder_image, file_extension_image, file_name)
-
         if image and exist_project.image_url:
             file_path = os.path.join(self.static_folder_image, exist_project.image_url)
             delete_file(file_path)
             exist_project.image_url = upload_file(image, self.static_folder_image, file_extension_image, file_name)
-        
-        if logo and not exist_project.logo_url:
-            exist_project.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, file_name)
+
+        if image and not exist_project.image_url:
+            exist_project.image_url = upload_file(image, self.static_folder_image, file_extension_image, file_name)
 
         if logo and exist_project.logo_url:
             file_path = os.path.join(self.static_folder_logo, exist_project.logo_url)
             delete_file(file_path)
+            exist_project.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, file_name)
+
+        if logo and not exist_project.logo_url:
             exist_project.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, file_name)
         
         exist_project.title = project.title

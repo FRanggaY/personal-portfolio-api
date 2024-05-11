@@ -48,20 +48,20 @@ class SkillService:
         exist_skill.category = skill.category
         exist_skill.is_active = skill.is_active
 
-        if image and not exist_skill.image_url:
-            exist_skill.image_url = upload_file(image, self.static_folder_image, file_extension_image, skill.code)
-
         if image and exist_skill.image_url:
             file_path = os.path.join(self.static_folder_image, exist_skill.image_url)
             delete_file(file_path)
             exist_skill.image_url = upload_file(image, self.static_folder_image, file_extension_image, skill.code)
         
-        if logo and not exist_skill.logo_url:
-            exist_skill.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, skill.code)
-
+        if image and not exist_skill.image_url:
+            exist_skill.image_url = upload_file(image, self.static_folder_image, file_extension_image, skill.code)
+        
         if logo and exist_skill.logo_url:
             file_path = os.path.join(self.static_folder_logo, exist_skill.logo_url)
             delete_file(file_path)
+            exist_skill.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, skill.code)
+        
+        if logo and not exist_skill.logo_url:
             exist_skill.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, skill.code)
 
         return self.skill_repository.update_skill(exist_skill)

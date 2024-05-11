@@ -29,22 +29,22 @@ class SolutionService:
         file_extension_image = None,
         file_extension_logo = None,
     ):
-        if image and not exist_solution.image_url:
-            exist_solution.image_url = upload_file(image, self.static_folder_image, file_extension_image, file_name)
-
         if image and exist_solution.image_url:
             file_path = os.path.join(self.static_folder_image, exist_solution.image_url)
             delete_file(file_path)
             exist_solution.image_url = upload_file(image, self.static_folder_image, file_extension_image, file_name)
         
-        if logo and not exist_solution.logo_url:
-            exist_solution.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, file_name)
+        if image and not exist_solution.image_url:
+            exist_solution.image_url = upload_file(image, self.static_folder_image, file_extension_image, file_name)
 
         if logo and exist_solution.logo_url:
             file_path = os.path.join(self.static_folder_logo, exist_solution.logo_url)
             delete_file(file_path)
             exist_solution.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, file_name)
-        
+
+        if logo and not exist_solution.logo_url:
+            exist_solution.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, file_name)
+
         exist_solution.title = solution.title
         exist_solution.is_active = solution.is_active
 

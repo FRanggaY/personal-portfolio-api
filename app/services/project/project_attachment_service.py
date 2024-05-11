@@ -26,14 +26,15 @@ class ProjectAttachmentService:
         image: UploadFile = None,
         file_extension_image = None,
         ):
-        if image and not exist_project_attachment.image_url:
-            exist_project_attachment.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{exist_project.user.username}-{exist_project.title}-{project_attachment.title}")
 
         if image and exist_project_attachment.image_url:
             file_path = os.path.join(self.static_folder_image, exist_project_attachment.image_url)
             delete_file(file_path)
             exist_project_attachment.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{exist_project.user.username}-{exist_project.title}-{project_attachment.title}")
         
+        if image and not exist_project_attachment.image_url:
+            exist_project_attachment.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{exist_project.user.username}-{exist_project.title}-{project_attachment.title}")
+
         exist_project_attachment.title = project_attachment.title
         exist_project_attachment.is_active = project_attachment.is_active
         exist_project_attachment.description = project_attachment.description

@@ -51,12 +51,12 @@ class UserService:
         exist_user.is_active = user.is_active
         exist_user.gender = user.gender
 
-        if image and not exist_user.image_url:
-            exist_user.image_url = upload_file(image, self.static_folder_image, file_extension, user.username)
-
         if image and exist_user.image_url:
             file_path = os.path.join(self.static_folder_image, exist_user.image_url)
             delete_file(file_path)
+            exist_user.image_url = upload_file(image, self.static_folder_image, file_extension, user.username)
+
+        if image and not exist_user.image_url:
             exist_user.image_url = upload_file(image, self.static_folder_image, file_extension, user.username)
 
         return self.user_repository.update_user(exist_user)
