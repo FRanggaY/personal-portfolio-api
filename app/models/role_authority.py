@@ -33,6 +33,7 @@ class RoleAuthorityFeature(EnumParam):
     experience = "experience"
     experience_other = "experience_other"
     skill = "skill"
+    skill_mapping = "skill_mapping"
     skill_other = "skill_other"
     solution = "solution"
     solution_other = "solution_other"

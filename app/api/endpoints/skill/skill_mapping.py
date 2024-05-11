@@ -36,7 +36,7 @@ async def create_skill_mapping(
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill.value, name=RoleAuthorityName.create.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_mapping.value, name=RoleAuthorityName.create.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to create")
 
@@ -182,7 +182,7 @@ def read_skill_mapping(
     user_id_filter = user_id_active
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.experience_other.value, name=RoleAuthorityName.view.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_mapping.value, name=RoleAuthorityName.view.value)
     if role_authority:
         user_id_filter = None
 
@@ -238,7 +238,7 @@ async def update_skill_mapping(
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill.value, name=RoleAuthorityName.edit.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_mapping.value, name=RoleAuthorityName.edit.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to edit")
     
@@ -302,7 +302,7 @@ async def delete_skill_mapping(
     user_service = UserService(db)
     
     user_active = user_service.user_repository.read_user(user_id_active)
-    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill.value, name=RoleAuthorityName.delete.value)
+    role_authority = role_authority_service.role_authority_repository.get_role_authority_by_specific(role_id=user_active.role_id, feature=RoleAuthorityFeature.skill_mapping.value, name=RoleAuthorityName.delete.value)
     if not role_authority:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allow to delete")
     
