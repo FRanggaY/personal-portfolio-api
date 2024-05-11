@@ -8,6 +8,24 @@ from app.models.role_authority import RoleAuthority, RoleAuthorityFeature, RoleA
 
 from app.models.user import User
 
+# remove this will break orm rule
+from app.models.education.education import Education
+from app.models.education.education_translation import EducationTranslation
+from app.models.experience.experience import Experience
+from app.models.experience.experience_translation import ExperienceTranslation
+from app.models.solution.solution import Solution
+from app.models.solution.solution_translation import SolutionTranslation
+from app.models.project.project import Project
+from app.models.project.project_translation import ProjectTranslation
+from app.models.project.project_attachment import ProjectAttachment
+from app.models.project.project_skill import ProjectSkill
+from app.models.skill.skill_translation import SkillTranslation
+from app.models.skill.skill_mapping import SkillMapping
+from app.models.school.school import School
+from app.models.school.school_translation import SchoolTranslation
+from app.models.company.company import Company
+from app.models.company.company_translation import CompanyTranslation
+
 config_env = dotenv_values()
 
 # Step 2: Connect to PostgreSQL
