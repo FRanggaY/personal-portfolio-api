@@ -47,7 +47,6 @@ class SkillService:
         exist_skill.website_url = skill.website_url
         exist_skill.category = skill.category
         exist_skill.is_active = skill.is_active
-        exist_skill.created_at = skill.category
 
         if image and not exist_skill.image_url:
             exist_skill.image_url = upload_file(image, self.static_folder_image, file_extension_image, skill.code)
