@@ -13,9 +13,9 @@ class SolutionService:
         self.static_folder_image = "static/images/solution/image"
         self.static_folder_logo = "static/images/solution/logo"
 
-    def create_solution(self, solution: Solution, image: UploadFile = None, logo: UploadFile = None, file_extension_image = None, file_extension_logo = None):
-        solution.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{solution.user.username}-{solution.title}") if image else ''
-        solution.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, f"{solution.user.username}-{solution.title}") if logo else ''
+    def create_solution(self, file_name: str, solution: Solution, image: UploadFile = None, logo: UploadFile = None, file_extension_image = None, file_extension_logo = None):
+        solution.image_url = upload_file(image, self.static_folder_image, file_extension_image,  file_name) if image else ''
+        solution.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, file_name) if logo else ''
 
         return self.solution_repository.create_solution(solution)
 

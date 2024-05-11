@@ -13,9 +13,9 @@ class ProjectService:
         self.static_folder_image = "static/images/project/image"
         self.static_folder_logo = "static/images/project/logo"
 
-    def create_project(self, project: Project, image: UploadFile = None, logo: UploadFile = None, file_extension_image = None, file_extension_logo = None):
-        project.image_url = upload_file(image, self.static_folder_image, file_extension_image,  f"{project.user.username}-{project.title}") if image else ''
-        project.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, f"{project.user.username}-{project.title}") if logo else ''
+    def create_project(self, file_name:str, project: Project, image: UploadFile = None, logo: UploadFile = None, file_extension_image = None, file_extension_logo = None):
+        project.image_url = upload_file(image, self.static_folder_image, file_extension_image,  file_name) if image else ''
+        project.logo_url = upload_file(logo, self.static_folder_logo, file_extension_logo, file_name) if logo else ''
 
         return self.project_repository.create_project(project)
 

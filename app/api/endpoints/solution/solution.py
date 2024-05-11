@@ -59,12 +59,15 @@ async def create_solution(
             title=title,
         )
 
+        file_name = f"{user_active.username}-{title}"
+
         data = solution_service.create_solution(
-            solution_model,
-            image,
-            logo,
-            file_extension_image,
-            file_extension_logo
+            solution=solution_model,
+            image=image,
+            logo=logo,
+            file_extension_image=file_extension_image,
+            file_extension_logo=file_extension_logo,
+            file_name=file_name,
         )
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
