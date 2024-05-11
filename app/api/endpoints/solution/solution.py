@@ -288,13 +288,16 @@ async def update_solution(
             is_active=is_active,
         )
 
+        file_name = f"{user_active.username}-{title}"
+
         data = solution_service.update_solution(
-            exist_solution,
-            solution_model,
-            image,
-            logo,
-            file_extension_image,
-            file_extension_logo
+            exist_solution=exist_solution,
+            solution=solution_model,
+            image=image,
+            logo=logo,
+            file_extension_image=file_extension_image,
+            file_extension_logo=file_extension_logo,
+            file_name=file_name
         )
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
