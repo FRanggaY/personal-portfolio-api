@@ -27,7 +27,7 @@ def upgrade() -> None:
         sa.Column('user_id', sa.String(36), nullable=True),
         sa.Column('title', sa.String(128), unique=False, nullable=False),
         sa.Column('started_at', sa.Date, nullable=False),
-        sa.Column('finished_at', sa.Date, nullable=False),
+        sa.Column('finished_at', sa.Date, nullable=True),
         sa.Column('is_active', sa.Boolean, default=True),
         sa.Column('created_at', sa.DateTime, server_default=sa.func.NOW(), nullable=False),
         sa.Column('updated_at', sa.DateTime, server_default=sa.func.NOW(), onupdate=sa.func.NOW(), nullable=False),

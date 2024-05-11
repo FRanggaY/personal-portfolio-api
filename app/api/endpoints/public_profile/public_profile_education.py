@@ -96,7 +96,7 @@ def public_profile_education(
             'description': education_translation.description,
             'field_of_study': education_translation.field_of_study,
             'started_at': str(education_translation.education.started_at),
-            'finished_at': str(education_translation.education.finished_at),
+            'finished_at': str(education_translation.education.finished_at) if education_translation.education.finished_at else None,
             'created_at': str(education_translation.created_at),
             'updated_at': str(education_translation.updated_at),
             'school': school

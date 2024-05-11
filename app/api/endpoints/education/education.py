@@ -20,7 +20,7 @@ async def create_education(
     school_id: str = Form(..., min_length=1, max_length=36),
     title: str = Form(..., min_length=1, max_length=128),
     started_at: date = Form(...),
-    finished_at: date = Form(...),
+    finished_at: date = Form(None),
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
@@ -144,7 +144,7 @@ def read_educations(
             'title': education.title,
             'is_active': education.is_active,
             'started_at': str(education.started_at),
-            'finished_at': str(education.finished_at),
+            'finished_at': str(education.finished_at) if education.finished_at else None,
             'created_at': str(education.created_at),
             'updated_at': str(education.updated_at),
         })
@@ -213,7 +213,7 @@ def read_education(
             'title': education.title,
             'is_active': education.is_active,
             'started_at': str(education.started_at),
-            'finished_at': str(education.finished_at),
+            'finished_at': str(education.finished_at) if education.finished_at else None,
             'created_at': str(education.created_at),
             'updated_at': str(education.updated_at),
         },

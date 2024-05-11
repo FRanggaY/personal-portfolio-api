@@ -20,7 +20,7 @@ async def create_experience(
     company_id: str = Form(..., min_length=1, max_length=36),
     title: str = Form(..., min_length=1, max_length=128),
     started_at: date = Form(...),
-    finished_at: date = Form(...),
+    finished_at: date = Form(None),
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
@@ -145,7 +145,7 @@ def read_experiences(
             'title': experience.title,
             'is_active': experience.is_active,
             'started_at': str(experience.started_at),
-            'finished_at': str(experience.finished_at),
+            'finished_at': str(experience.finished_at) if experience.finished_at else None,
             'created_at': str(experience.created_at),
             'updated_at': str(experience.updated_at),
         })
@@ -214,7 +214,7 @@ def read_experience(
             'title': experience.title,
             'is_active': experience.is_active,
             'started_at': str(experience.started_at),
-            'finished_at': str(experience.finished_at),
+            'finished_at': str(experience.finished_at) if experience.finished_at else None,
             'created_at': str(experience.created_at),
             'updated_at': str(experience.updated_at),
         },

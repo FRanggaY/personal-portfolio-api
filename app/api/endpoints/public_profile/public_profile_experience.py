@@ -97,7 +97,7 @@ def public_profile_experience(
             'location': experience_translation.location,
             'location_type': experience_translation.location_type,
             'started_at': str(experience_translation.experience.started_at),
-            'finished_at': str(experience_translation.experience.finished_at),
+            'finished_at': str(experience_translation.experience.finished_at) if experience_translation.experience.finished_at else None,
             'created_at': str(experience_translation.created_at),
             'updated_at': str(experience_translation.updated_at),
             'company': company
