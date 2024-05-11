@@ -39,6 +39,9 @@ def public_profile_skill(
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
     
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='user not found')
+
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='this user is not active')
     
