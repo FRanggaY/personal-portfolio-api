@@ -195,6 +195,7 @@ def public_profile_project_detail(
             'id': project_translation.id,
             'title': project_translation.title,
             'description': project_translation.description,
+            'slug': project_translation.project.slug,
             'is_active': project_translation.project.is_active,
             'created_at': str(project.created_at),
             'updated_at': str(project.updated_at),
