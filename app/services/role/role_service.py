@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
-from app.models.role import Role
-from app.repositories.role_repository import RoleRepository
+from app.models.role.role import Role
+from app.repositories.role.role_repository import RoleRepository
 
 class RoleService:
     def __init__(self, db: Session):

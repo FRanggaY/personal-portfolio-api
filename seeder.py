@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from passlib.context import CryptContext
 from app.models.role import Role
-from app.models.role_authority import RoleAuthority, RoleAuthorityFeature, RoleAuthorityName
+from app.models.role.role_authority import RoleAuthority, RoleAuthorityFeature, RoleAuthorityName
 
 from app.models.user import User
 

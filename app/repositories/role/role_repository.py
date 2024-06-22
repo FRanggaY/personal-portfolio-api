@@ -1,6 +1,6 @@
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
-from app.models.role import Role
+from app.models.role.role import Role
 
 class RoleRepository:
     def __init__(self, db: Session):

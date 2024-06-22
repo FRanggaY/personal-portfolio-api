@@ -4,10 +4,10 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import LanguageOption
 from app.models.response import GeneralDataResponse
-from app.models.role_authority import RoleAuthorityFeature, RoleAuthorityName
+from app.models.role.role_authority import RoleAuthorityFeature, RoleAuthorityName
 from app.models.skill.skill_translation import SkillTranslation
 from app.services.skill.skill_service import SkillService
-from app.services.role_authority_service import RoleAuthorityService
+from app.services.role.role_authority_service import RoleAuthorityService
 from app.services.skill.skill_translation_service import SkillTranslationService
 from app.services.user_service import UserService
 from app.utils.authentication import Authentication

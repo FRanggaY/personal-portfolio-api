@@ -4,8 +4,10 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dtos.auth import AuthLogin, AuthProfilePassword
 from app.models.response import AuthResponse, GeneralDataResponse
+from app.models.role.role_authority import RoleAuthorityName
 from app.models.user import User, UserGender
 from app.services.auth_service import AuthService
+from app.services.role.role_authority_service import RoleAuthorityService
 from app.services.user_service import UserService
 from app.utils.authentication import Authentication
 from app.utils.handling_file import validation_file
@@ -53,12 +55,18 @@ def auth_profile(request: Request, db: Session = Depends(get_db),  payload = Dep
     """
     user_id = payload.get("uid", None)
     user_service = UserService(db)
+    role_authority_service = RoleAuthorityService(db)
     base_url = str(request.base_url) if request else ""
 
     try:
         user = user_service.user_repository.read_user(user_id)
     except ValueError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error))
+    
+    role_authorities = role_authority_service.role_authority_repository.read_role_authorities(role_id=user.role_id, name=RoleAuthorityName.view.value)
+    role_authority_list = [role_authority.feature for role_authority in role_authorities] if role_authorities else []
+    # global
+    role_authority_list.append('dashboard')
     
     status_code = status.HTTP_200_OK
 
@@ -77,6 +85,7 @@ def auth_profile(request: Request, db: Session = Depends(get_db),  payload = Dep
         'name': user.name,
         'role': role_data,
         'image_url': f"{base_url}{user_service.static_folder_image}/{user.image_url}" if user.image_url else None,
+        'view_mode': role_authority_list
     }
 
     auth_response = AuthResponse(

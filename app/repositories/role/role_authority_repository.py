@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
-from app.models.role_authority import RoleAuthority
+from app.models.role.role_authority import RoleAuthority
 
 class RoleAuthorityRepository:
     def __init__(self, db: Session):

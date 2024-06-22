@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy import asc, desc, or_
 from sqlalchemy.orm import Session
-from app.models.role import Role
+from app.models.role.role import Role
 from app.models.user import User
 
 class UserRepository:

@@ -3,10 +3,10 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.response import GeneralDataPaginateResponse, GeneralDataResponse
-from app.models.role_authority import RoleAuthorityFeature, RoleAuthorityName
+from app.models.role.role_authority import RoleAuthorityFeature, RoleAuthorityName
 from app.models.user import User, UserGender
-from app.services.role_authority_service import RoleAuthorityService
-from app.services.role_service import RoleService
+from app.services.role.role_authority_service import RoleAuthorityService
+from app.services.role.role_service import RoleService
 from app.services.user_service import UserService
 from app.utils.authentication import Authentication
 from app.utils.handling_file import validation_file

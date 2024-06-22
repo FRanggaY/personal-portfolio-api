@@ -3,7 +3,7 @@ from sqlalchemy import Column, DateTime, Integer, String, func, ForeignKey, Bool
 from enum import Enum as EnumParam
 
 from app.database import Base
-from app.models import role_authority
+from app.models.role import role_authority
 
 class Role(Base):
     __tablename__ = "roles"

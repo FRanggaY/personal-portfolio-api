@@ -4,9 +4,9 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.response import GeneralDataPaginateResponse, GeneralDataResponse
-from app.models.role_authority import RoleAuthorityFeature, RoleAuthorityName
+from app.models.role.role_authority import RoleAuthorityFeature, RoleAuthorityName
 from app.models.project.project_attachment import ProjectAttachment
-from app.services.role_authority_service import RoleAuthorityService
+from app.services.role.role_authority_service import RoleAuthorityService
 from app.services.project.project_attachment_service import ProjectAttachmentService
 from app.services.project.project_service import ProjectService
 from app.services.user_service import UserService
