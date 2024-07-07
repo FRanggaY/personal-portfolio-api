@@ -52,6 +52,10 @@ class ExperienceTranslationRepository:
                 query = query.order_by(asc(getattr(ExperienceTranslation, sort_by)))
             elif sort_order == 'desc' and hasattr(ExperienceTranslation, sort_by):
                 query = query.order_by(desc(getattr(ExperienceTranslation, sort_by)))
+            elif sort_order == 'asc' and hasattr(Experience, sort_by):
+                query = query.order_by(asc(getattr(Experience, sort_by)))
+            elif sort_order == 'desc' and hasattr(Experience, sort_by):
+                query = query.order_by(desc(getattr(Experience, sort_by)))
 
         if offset is not None and size is not None:
             query = query.offset((offset - 1) * size).limit(size)

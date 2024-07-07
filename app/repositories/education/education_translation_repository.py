@@ -52,6 +52,10 @@ class EducationTranslationRepository:
                 query = query.order_by(asc(getattr(EducationTranslation, sort_by)))
             elif sort_order == 'desc' and hasattr(EducationTranslation, sort_by):
                 query = query.order_by(desc(getattr(EducationTranslation, sort_by)))
+            elif sort_order == 'asc' and hasattr(Education, sort_by):
+                query = query.order_by(asc(getattr(Education, sort_by)))
+            elif sort_order == 'desc' and hasattr(Education, sort_by):
+                query = query.order_by(desc(getattr(Education, sort_by)))
 
         if offset is not None and size is not None:
             query = query.offset((offset - 1) * size).limit(size)
