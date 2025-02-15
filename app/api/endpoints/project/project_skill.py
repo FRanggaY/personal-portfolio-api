@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, Query, Request, status, HTTPException
+from fastapi import APIRouter, Depends, Form, Query,status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -91,7 +91,6 @@ async def create_project_skill(
 
 @router.get("", response_model=GeneralDataPaginateResponse, status_code=status.HTTP_200_OK)
 def read_project_skills(
-    request: Request,
     project_id: str = Query(None),
     sort_by: str = Query(None),
     sort_order: str = Query(None),
@@ -111,7 +110,7 @@ def read_project_skills(
     project_skill_service = ProjectSkillService(db)
     skill_service = SkillService(db)
 
-    base_url = str(request.base_url) if request else ""
+    
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
     project_skills = project_skill_service.project_skill_repository.read_project_skills(
@@ -137,8 +136,8 @@ def read_project_skills(
 
     datas = []
     for project_skill in project_skills:
-        image_url = f"{base_url}{skill_service.static_folder_image}/{project_skill.skill.image_url}" if project_skill.skill.image_url else None
-        logo_url = f"{base_url}{skill_service.static_folder_logo}/{project_skill.skill.logo_url}" if project_skill.skill.logo_url else None
+        image_url = f"{skill_service.static_folder_image}/{project_skill.skill.image_url}" if project_skill.skill.image_url else None
+        logo_url = f"{skill_service.static_folder_logo}/{project_skill.skill.logo_url}" if project_skill.skill.logo_url else None
         skill = {
             'id': project_skill.skill.id,
             'name': project_skill.skill.name,

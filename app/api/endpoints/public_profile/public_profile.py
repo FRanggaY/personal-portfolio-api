@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -8,12 +8,11 @@ from app.services.user_service import UserService
 router = APIRouter()
 
 @router.get("/{username}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
-def public_profile(username: str, request: Request, db: Session = Depends(get_db)):
+def public_profile(username: str, db: Session = Depends(get_db)):
     """
         Profile user public
     """
     user_service = UserService(db)
-    base_url = str(request.base_url) if request else ""
 
     try:
         user = user_service.user_repository.get_user_by_username(username)
@@ -33,7 +32,7 @@ def public_profile(username: str, request: Request, db: Session = Depends(get_db
         'username': user.username,
         'gender': user.gender,
         'name': user.name,
-        'image_url': f"{base_url}{user_service.static_folder_image}/{user.image_url}" if user.image_url else None,
+        'image_url': f"{user_service.static_folder_image}/{user.image_url}" if user.image_url else None,
     }
 
     data_response = GeneralDataResponse(

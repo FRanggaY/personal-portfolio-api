@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, Query, Request, UploadFile, status, HTTPException
+from fastapi import APIRouter, Depends, Form, Query, UploadFile, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -99,7 +99,6 @@ async def create_skill(
 
 @router.get("", response_model=GeneralDataPaginateResponse, status_code=status.HTTP_200_OK)
 def read_skills(
-    request: Request,
     sort_by: str = Query(None),
     sort_order: str = Query(None),
     filter_by_column: str = Query(None),
@@ -117,7 +116,7 @@ def read_skills(
     """
     skill_service = SkillService(db)
 
-    base_url = str(request.base_url) if request else ""
+    
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
     skills = skill_service.skill_repository.read_skills(
@@ -149,8 +148,8 @@ def read_skills(
             'category': skill.category,
             'created_at': str(skill.created_at),
             'updated_at': str(skill.updated_at),
-            'image_url': f"{base_url}{skill_service.static_folder_image}/{skill.image_url}" if skill.image_url else None,
-            'logo_url': f"{base_url}{skill_service.static_folder_logo}/{skill.logo_url}" if skill.logo_url else None,
+            'image_url': f"{skill_service.static_folder_image}/{skill.image_url}" if skill.image_url else None,
+            'logo_url': f"{skill_service.static_folder_logo}/{skill.logo_url}" if skill.logo_url else None,
             'website_url': str(skill.website_url) if skill.website_url else None,
         })
 
@@ -172,7 +171,6 @@ def read_skills(
 @router.get("/{skill_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
 def read_skill(
     skill_id: str,
-    request: Request,
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
@@ -182,7 +180,7 @@ def read_skill(
         - should login
     """
     skill_service = SkillService(db)
-    base_url = str(request.base_url) if request else ""
+    
     skill = skill_service.skill_repository.read_skill(skill_id)
 
     if not skill:
@@ -200,8 +198,8 @@ def read_skill(
             'category': skill.category,
             'created_at': str(skill.created_at),
             'updated_at': str(skill.updated_at),
-            'image_url': f"{base_url}{skill_service.static_folder_image}/{skill.image_url}" if skill.image_url else None,
-            'logo_url': f"{base_url}{skill_service.static_folder_logo}/{skill.logo_url}" if skill.logo_url else None,
+            'image_url': f"{skill_service.static_folder_image}/{skill.image_url}" if skill.image_url else None,
+            'logo_url': f"{skill_service.static_folder_logo}/{skill.logo_url}" if skill.logo_url else None,
             'website_url': str(skill.website_url) if skill.website_url else None,
         },
     )

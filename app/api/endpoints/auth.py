@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, Request, UploadFile, status, HTTPException
+from fastapi import APIRouter, Depends, Form, UploadFile, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -49,14 +49,13 @@ def auth_login(auth_login: AuthLogin, db: Session = Depends(get_db)):
     return response
 
 @router.get("/profile", response_model=AuthResponse, status_code=status.HTTP_200_OK)
-def auth_profile(request: Request, db: Session = Depends(get_db),  payload = Depends(Authentication())):
+def auth_profile(db: Session = Depends(get_db),  payload = Depends(Authentication())):
     """
         Profile user
     """
     user_id = payload.get("uid", None)
     user_service = UserService(db)
     role_authority_service = RoleAuthorityService(db)
-    base_url = str(request.base_url) if request else ""
 
     try:
         user = user_service.user_repository.read_user(user_id)
@@ -84,7 +83,7 @@ def auth_profile(request: Request, db: Session = Depends(get_db),  payload = Dep
         'gender': user.gender,
         'name': user.name,
         'role': role_data,
-        'image_url': f"{base_url}{user_service.static_folder_image}/{user.image_url}" if user.image_url else None,
+        'image_url': f"{user_service.static_folder_image}/{user.image_url}" if user.image_url else None,
         'view_mode': role_authority_list
     }
 

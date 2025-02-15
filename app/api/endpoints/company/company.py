@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, Query, Request, UploadFile, status, HTTPException
+from fastapi import APIRouter, Depends, Form, Query, UploadFile, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -97,7 +97,6 @@ async def create_company(
 
 @router.get("", response_model=GeneralDataPaginateResponse, status_code=status.HTTP_200_OK)
 def read_companies(
-    request: Request,
     sort_by: str = Query(None),
     sort_order: str = Query(None),
     filter_by_column: str = Query(None),
@@ -115,7 +114,6 @@ def read_companies(
     """
     company_service = CompanyService(db)
 
-    base_url = str(request.base_url) if request else ""
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
     companies = company_service.company_repository.read_companies(
@@ -146,8 +144,8 @@ def read_companies(
             'is_active': company.is_active,
             'created_at': str(company.created_at),
             'updated_at': str(company.updated_at),
-            'image_url': f"{base_url}{company_service.static_folder_image}/{company.image_url}" if company.image_url else None,
-            'logo_url': f"{base_url}{company_service.static_folder_logo}/{company.logo_url}" if company.logo_url else None,
+            'image_url': f"{company_service.static_folder_image}/{company.image_url}" if company.image_url else None,
+            'logo_url': f"{company_service.static_folder_logo}/{company.logo_url}" if company.logo_url else None,
             'website_url': str(company.website_url) if company.website_url else None,
         })
 
@@ -169,7 +167,6 @@ def read_companies(
 @router.get("/{company_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
 def read_company(
     company_id: str,
-    request: Request,
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
@@ -179,7 +176,6 @@ def read_company(
         - should login
     """
     company_service = CompanyService(db)
-    base_url = str(request.base_url) if request else ""
     company = company_service.company_repository.read_company(company_id)
 
     if not company:
@@ -196,8 +192,8 @@ def read_company(
             'is_active': company.is_active,
             'created_at': str(company.created_at),
             'updated_at': str(company.updated_at),
-            'image_url': f"{base_url}{company_service.static_folder_image}/{company.image_url}" if company.image_url else None,
-            'logo_url': f"{base_url}{company_service.static_folder_logo}/{company.logo_url}" if company.logo_url else None,
+            'image_url': f"{company_service.static_folder_image}/{company.image_url}" if company.image_url else None,
+            'logo_url': f"{company_service.static_folder_logo}/{company.logo_url}" if company.logo_url else None,
             'website_url': str(company.website_url) if company.website_url else None,
         },
     )

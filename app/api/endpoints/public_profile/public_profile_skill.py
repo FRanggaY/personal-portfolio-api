@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, Request, status, HTTPException
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -15,7 +15,6 @@ router = APIRouter()
 def public_profile_skill(
     username: str, 
     language_id: LanguageOption,
-    request: Request, 
     offset: int = Query(1, ge=1), 
     size: int = Query(10, ge=1, lt=100),
     sort_by: str = Query(None),
@@ -31,8 +30,6 @@ def public_profile_skill(
     skill_service = SkillService(db)
     skill_translation_service = SkillTranslationService(db)
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
-
-    base_url = str(request.base_url) if request else ""
 
     try:
         user = user_service.user_repository.get_user_by_username(username)
@@ -75,8 +72,8 @@ def public_profile_skill(
             'description': skill_translation.description,
             'created_at': str(skill_translation.created_at),
             'updated_at': str(skill_translation.updated_at),
-            'image_url': f"{base_url}{skill_service.static_folder_image}/{skill_translation.skill.image_url}" if skill_translation.skill.image_url else None,
-            'logo_url': f"{base_url}{skill_service.static_folder_logo}/{skill_translation.skill.logo_url}" if skill_translation.skill.logo_url else None,
+            'image_url': f"{skill_service.static_folder_image}/{skill_translation.skill.image_url}" if skill_translation.skill.image_url else None,
+            'logo_url': f"{skill_service.static_folder_logo}/{skill_translation.skill.logo_url}" if skill_translation.skill.logo_url else None,
             'website_url': str(skill_translation.skill.website_url) if skill_translation.skill.website_url else None,
         })
 

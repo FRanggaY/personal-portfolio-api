@@ -1,5 +1,5 @@
 from datetime import date
-from fastapi import APIRouter, Depends, Form, Query, Request, UploadFile, status, HTTPException
+from fastapi import APIRouter, Depends, Form, Query, UploadFile, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -99,7 +99,6 @@ async def create_project_attachment(
 
 @router.get("", response_model=GeneralDataPaginateResponse, status_code=status.HTTP_200_OK)
 def read_project_attachments(
-    request: Request,
     project_id: str = Query(None),
     sort_by: str = Query(None),
     sort_order: str = Query(None),
@@ -118,7 +117,7 @@ def read_project_attachments(
     """
     project_attachment_service = ProjectAttachmentService(db)
 
-    base_url = str(request.base_url) if request else ""
+    
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
     project_attachments = project_attachment_service.project_attachment_repository.read_project_attachments(
@@ -153,7 +152,7 @@ def read_project_attachments(
             'category': project_attachment.category,
             'created_at': str(project_attachment.created_at),
             'updated_at': str(project_attachment.updated_at),
-            'image_url': f"{base_url}{project_attachment_service.static_folder_image}/{project_attachment.image_url}" if project_attachment.image_url else None,
+            'image_url': f"{project_attachment_service.static_folder_image}/{project_attachment.image_url}" if project_attachment.image_url else None,
         })
 
     status_code = status.HTTP_200_OK
@@ -174,7 +173,6 @@ def read_project_attachments(
 @router.get("/{project_attachment_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
 def read_project_attachment(
     project_attachment_id: str,
-    request: Request,
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
@@ -199,7 +197,7 @@ def read_project_attachment(
     if role_authority:
         user_id_filter = None
 
-    base_url = str(request.base_url) if request else ""
+    
     project_attachment = project_attachment_service.project_attachment_repository.read_project_attachment(project_attachment_id)
 
     if not project_attachment:
@@ -221,7 +219,7 @@ def read_project_attachment(
             'category': project_attachment.category,
             'created_at': str(project_attachment.created_at),
             'updated_at': str(project_attachment.updated_at),
-            'image_url': f"{base_url}{project_attachment_service.static_folder_image}/{project_attachment.image_url}" if project_attachment.image_url else None,
+            'image_url': f"{project_attachment_service.static_folder_image}/{project_attachment.image_url}" if project_attachment.image_url else None,
         },
     )
     response = JSONResponse(content=data_response.model_dump(), status_code=status_code)

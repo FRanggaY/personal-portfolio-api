@@ -1,5 +1,5 @@
 from datetime import date
-from fastapi import APIRouter, Depends, Form, Query, Request, UploadFile, status, HTTPException
+from fastapi import APIRouter, Depends, Form, Query, UploadFile, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -94,7 +94,6 @@ async def create_project(
 
 @router.get("", response_model=GeneralDataPaginateResponse, status_code=status.HTTP_200_OK)
 def read_projects(
-    request: Request,
     sort_by: str = Query(None),
     sort_order: str = Query(None),
     filter_by_column: str = Query(None),
@@ -126,7 +125,7 @@ def read_projects(
     if role_authority:
         user_id_filter = None
 
-    base_url = str(request.base_url) if request else ""
+    
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
     projects = project_service.project_repository.read_projects(
@@ -159,8 +158,8 @@ def read_projects(
             'slug': project.slug,
             'created_at': str(project.created_at),
             'updated_at': str(project.updated_at),
-            'image_url': f"{base_url}{project_service.static_folder_image}/{project.image_url}" if project.image_url else None,
-            'logo_url': f"{base_url}{project_service.static_folder_logo}/{project.logo_url}" if project.logo_url else None,
+            'image_url': f"{project_service.static_folder_image}/{project.image_url}" if project.image_url else None,
+            'logo_url': f"{project_service.static_folder_logo}/{project.logo_url}" if project.logo_url else None,
         })
 
     status_code = status.HTTP_200_OK
@@ -181,7 +180,6 @@ def read_projects(
 @router.get("/{project_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
 def read_project(
     project_id: str,
-    request: Request,
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
@@ -206,7 +204,7 @@ def read_project(
     if role_authority:
         user_id_filter = None
 
-    base_url = str(request.base_url) if request else ""
+    
     project = project_service.project_repository.read_project(project_id)
 
     if not project:
@@ -226,8 +224,8 @@ def read_project(
             'is_active': project.is_active,
             'created_at': str(project.created_at),
             'updated_at': str(project.updated_at),
-            'image_url': f"{base_url}{project_service.static_folder_image}/{project.image_url}" if project.image_url else None,
-            'logo_url': f"{base_url}{project_service.static_folder_logo}/{project.logo_url}" if project.logo_url else None,
+            'image_url': f"{project_service.static_folder_image}/{project.image_url}" if project.image_url else None,
+            'logo_url': f"{project_service.static_folder_logo}/{project.logo_url}" if project.logo_url else None,
         },
     )
     response = JSONResponse(content=data_response.model_dump(), status_code=status_code)

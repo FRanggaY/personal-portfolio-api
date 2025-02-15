@@ -1,5 +1,5 @@
 from datetime import date
-from fastapi import APIRouter, Depends, Form, Query, Request, UploadFile, status, HTTPException
+from fastapi import APIRouter, Depends, Form, Query, UploadFile, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -88,7 +88,6 @@ async def create_solution(
 
 @router.get("", response_model=GeneralDataPaginateResponse, status_code=status.HTTP_200_OK)
 def read_solutions(
-    request: Request,
     sort_by: str = Query(None),
     sort_order: str = Query(None),
     filter_by_column: str = Query(None),
@@ -120,7 +119,7 @@ def read_solutions(
     if role_authority:
         user_id_filter = None
 
-    base_url = str(request.base_url) if request else ""
+    
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
     solutions = solution_service.solution_repository.read_solutions(
@@ -152,8 +151,8 @@ def read_solutions(
             'is_active': solution.is_active,
             'created_at': str(solution.created_at),
             'updated_at': str(solution.updated_at),
-            'image_url': f"{base_url}{solution_service.static_folder_image}/{solution.image_url}" if solution.image_url else None,
-            'logo_url': f"{base_url}{solution_service.static_folder_logo}/{solution.logo_url}" if solution.logo_url else None,
+            'image_url': f"{solution_service.static_folder_image}/{solution.image_url}" if solution.image_url else None,
+            'logo_url': f"{solution_service.static_folder_logo}/{solution.logo_url}" if solution.logo_url else None,
         })
 
     status_code = status.HTTP_200_OK
@@ -174,7 +173,6 @@ def read_solutions(
 @router.get("/{solution_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
 def read_solution(
     solution_id: str,
-    request: Request,
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
@@ -199,7 +197,7 @@ def read_solution(
     if role_authority:
         user_id_filter = None
 
-    base_url = str(request.base_url) if request else ""
+    
     solution = solution_service.solution_repository.read_solution(solution_id)
 
     if not solution:
@@ -218,8 +216,8 @@ def read_solution(
             'is_active': solution.is_active,
             'created_at': str(solution.created_at),
             'updated_at': str(solution.updated_at),
-            'image_url': f"{base_url}{solution_service.static_folder_image}/{solution.image_url}" if solution.image_url else None,
-            'logo_url': f"{base_url}{solution_service.static_folder_logo}/{solution.logo_url}" if solution.logo_url else None,
+            'image_url': f"{solution_service.static_folder_image}/{solution.image_url}" if solution.image_url else None,
+            'logo_url': f"{solution_service.static_folder_logo}/{solution.logo_url}" if solution.logo_url else None,
         },
     )
     response = JSONResponse(content=data_response.model_dump(), status_code=status_code)

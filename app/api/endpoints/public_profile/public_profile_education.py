@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, Request, status, HTTPException
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -16,7 +16,6 @@ router = APIRouter()
 def public_profile_education(
     username: str, 
     language_id: LanguageOption,
-    request: Request, 
     offset: int = Query(1, ge=1), 
     size: int = Query(10, ge=1, lt=100),
     sort_by: str = Query(None),
@@ -33,8 +32,6 @@ def public_profile_education(
     school_translation_service = SchoolTranslationService(db)
     education_translation_service = EducationTranslationService(db)
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
-
-    base_url = str(request.base_url) if request else ""
 
     try:
         user = user_service.user_repository.get_user_by_username(username)
@@ -77,8 +74,8 @@ def public_profile_education(
                 school_id=education_translation.education.school_id,
                 language_id=language_id
             )
-            image_url = f"{base_url}{school_service.static_folder_image}/{exist_school_translation.school.image_url}" if exist_school_translation.school.image_url else None
-            logo_url = f"{base_url}{school_service.static_folder_logo}/{exist_school_translation.school.logo_url}" if exist_school_translation.school.logo_url else None
+            image_url = f"{school_service.static_folder_image}/{exist_school_translation.school.image_url}" if exist_school_translation.school.image_url else None
+            logo_url = f"{school_service.static_folder_logo}/{exist_school_translation.school.logo_url}" if exist_school_translation.school.logo_url else None
             website_url = str(exist_school_translation.school.website_url) if exist_school_translation.school.website_url else None
             school = {
                 'name': exist_school_translation.name,

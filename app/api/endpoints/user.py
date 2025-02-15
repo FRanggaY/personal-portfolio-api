@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, Query, Request, UploadFile, status, HTTPException
+from fastapi import APIRouter, Depends, Form, Query, UploadFile, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -99,7 +99,6 @@ async def create_user(
 
 @router.get("", response_model=GeneralDataPaginateResponse, status_code=status.HTTP_200_OK)
 def read_users(
-    request: Request,
     role_id: int = Query(None),
     sort_by: str = Query(None),
     sort_order: str = Query(None),
@@ -125,7 +124,6 @@ def read_users(
     user_service = UserService(db)
     role_authority_service = RoleAuthorityService(db)
 
-    base_url = str(request.base_url) if request else ""
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
     
     user_active = user_service.user_repository.read_user(user_id_active)
@@ -179,7 +177,7 @@ def read_users(
             'last_login_at': str(user.last_login_at),
             'created_at': str(user.created_at),
             'updated_at': str(user.updated_at),
-            'image_url': f"{base_url}{user_service.static_folder_image}/{user.image_url}" if user.image_url else None,
+            'image_url': f"{user_service.static_folder_image}/{user.image_url}" if user.image_url else None,
         })
 
     status_code = status.HTTP_200_OK
@@ -200,7 +198,6 @@ def read_users(
 @router.get("/{user_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
 def read_user(
     user_id: str,
-    request: Request,
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
@@ -210,7 +207,6 @@ def read_user(
         - should login
     """
     user_service = UserService(db)
-    base_url = str(request.base_url) if request else ""
     user = user_service.user_repository.read_user(user_id)
 
     if not user:
@@ -238,7 +234,7 @@ def read_user(
             'last_login_at': str(user.last_login_at),
             'created_at': str(user.created_at),
             'updated_at': str(user.updated_at),
-            'image_url': f"{base_url}{user_service.static_folder_image}/{user.image_url}" if user.image_url else None,
+            'image_url': f"{user_service.static_folder_image}/{user.image_url}" if user.image_url else None,
         },
     )
     response = JSONResponse(content=data_response.model_dump(), status_code=status_code)

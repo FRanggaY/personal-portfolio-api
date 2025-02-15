@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, Request, status, HTTPException
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -15,7 +15,6 @@ router = APIRouter()
 def public_profile_solution(
     username: str, 
     language_id: LanguageOption,
-    request: Request, 
     offset: int = Query(1, ge=1), 
     size: int = Query(10, ge=1, lt=100),
     sort_by: str = Query(None),
@@ -31,8 +30,6 @@ def public_profile_solution(
     solution_service = SolutionService(db)
     solution_translation_service = SolutionTranslationService(db)
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
-
-    base_url = str(request.base_url) if request else ""
 
     try:
         user = user_service.user_repository.get_user_by_username(username)
@@ -69,8 +66,8 @@ def public_profile_solution(
 
     datas = []
     for solution_translation in solution_translations:
-        image_url = f"{base_url}{solution_service.static_folder_image}/{solution_translation.solution.image_url}" if solution_translation.solution.image_url else None
-        logo_url = f"{base_url}{solution_service.static_folder_logo}/{solution_translation.solution.logo_url}" if solution_translation.solution.logo_url else None
+        image_url = f"{solution_service.static_folder_image}/{solution_translation.solution.image_url}" if solution_translation.solution.image_url else None
+        logo_url = f"{solution_service.static_folder_logo}/{solution_translation.solution.logo_url}" if solution_translation.solution.logo_url else None
         
         datas.append({
             'id': solution_translation.id,

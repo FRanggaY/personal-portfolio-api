@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, Request, status, HTTPException
+from fastapi import APIRouter, Depends, Query, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -18,7 +18,6 @@ router = APIRouter()
 def public_profile_project(
     username: str, 
     language_id: LanguageOption,
-    request: Request, 
     offset: int = Query(1, ge=1), 
     size: int = Query(10, ge=1, lt=100),
     sort_by: str = Query(None),
@@ -34,8 +33,6 @@ def public_profile_project(
     project_service = ProjectService(db)
     project_translation_service = ProjectTranslationService(db)
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
-
-    base_url = str(request.base_url) if request else ""
 
     try:
         user = user_service.user_repository.get_user_by_username(username)
@@ -72,8 +69,8 @@ def public_profile_project(
 
     datas = []
     for project_translation in project_translations:
-        image_url = f"{base_url}{project_service.static_folder_image}/{project_translation.project.image_url}" if project_translation.project.image_url else None
-        logo_url = f"{base_url}{project_service.static_folder_logo}/{project_translation.project.logo_url}" if project_translation.project.logo_url else None
+        image_url = f"{project_service.static_folder_image}/{project_translation.project.image_url}" if project_translation.project.image_url else None
+        logo_url = f"{project_service.static_folder_logo}/{project_translation.project.logo_url}" if project_translation.project.logo_url else None
         
         datas.append({
             'id': project_translation.id,
@@ -106,8 +103,7 @@ def public_profile_project(
 def public_profile_project_detail(
     username: str, 
     language_id: LanguageOption, 
-    project_slug: str, 
-    request: Request, 
+    project_slug: str,
     db: Session = Depends(get_db)
 ):
     """
@@ -119,8 +115,6 @@ def public_profile_project_detail(
     project_skill_service = ProjectSkillService(db)
     skill_service = SkillService(db)
     project_attachment_service = ProjectAttachmentService(db)
-
-    base_url = str(request.base_url) if request else ""
 
     try:
         user = user_service.user_repository.get_user_by_username(username)
@@ -161,8 +155,8 @@ def public_profile_project_detail(
                 'description': skill_translation.description,
                 'created_at': str(skill_translation.created_at),
                 'updated_at': str(skill_translation.updated_at),
-                'image_url': f"{base_url}{skill_service.static_folder_image}/{skill_translation.skill.image_url}" if skill_translation.skill.image_url else None,
-                'logo_url': f"{base_url}{skill_service.static_folder_logo}/{skill_translation.skill.logo_url}" if skill_translation.skill.logo_url else None,
+                'image_url': f"{skill_service.static_folder_image}/{skill_translation.skill.image_url}" if skill_translation.skill.image_url else None,
+                'logo_url': f"{skill_service.static_folder_logo}/{skill_translation.skill.logo_url}" if skill_translation.skill.logo_url else None,
                 'website_url': str(skill_translation.skill.website_url) if skill_translation.skill.website_url else None,
             })
 
@@ -183,7 +177,7 @@ def public_profile_project_detail(
                 'category': project_attachment.category,
                 'created_at': str(project_attachment.created_at),
                 'updated_at': str(project_attachment.updated_at),
-                'image_url': f"{base_url}{project_attachment_service.static_folder_image}/{project_attachment.image_url}" if project_attachment.image_url else None,
+                'image_url': f"{project_attachment_service.static_folder_image}/{project_attachment.image_url}" if project_attachment.image_url else None,
             })
 
 
@@ -199,8 +193,8 @@ def public_profile_project_detail(
             'is_active': project_translation.project.is_active,
             'created_at': str(project.created_at),
             'updated_at': str(project.updated_at),
-            'image_url': f"{base_url}{project_service.static_folder_image}/{project.image_url}" if project.image_url else None,
-            'logo_url': f"{base_url}{project_service.static_folder_logo}/{project.logo_url}" if project.logo_url else None,
+            'image_url': f"{project_service.static_folder_image}/{project.image_url}" if project.image_url else None,
+            'logo_url': f"{project_service.static_folder_logo}/{project.logo_url}" if project.logo_url else None,
             'skills': skills,
             'attachments': attachments,
         },

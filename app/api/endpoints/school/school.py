@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, Query, Request, UploadFile, status, HTTPException
+from fastapi import APIRouter, Depends, Form, Query, UploadFile, status, HTTPException
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -97,7 +97,6 @@ async def create_school(
 
 @router.get("", response_model=GeneralDataPaginateResponse, status_code=status.HTTP_200_OK)
 def read_schools(
-    request: Request,
     sort_by: str = Query(None),
     sort_order: str = Query(None),
     filter_by_column: str = Query(None),
@@ -115,7 +114,7 @@ def read_schools(
     """
     school_service = SchoolService(db)
 
-    base_url = str(request.base_url) if request else ""
+    
     custom_filters = {filter_by_column: filter_value} if filter_by_column and filter_value else None
 
     schools = school_service.school_repository.read_schools(
@@ -146,8 +145,8 @@ def read_schools(
             'is_active': school.is_active,
             'created_at': str(school.created_at),
             'updated_at': str(school.updated_at),
-            'image_url': f"{base_url}{school_service.static_folder_image}/{school.image_url}" if school.image_url else None,
-            'logo_url': f"{base_url}{school_service.static_folder_logo}/{school.logo_url}" if school.logo_url else None,
+            'image_url': f"{school_service.static_folder_image}/{school.image_url}" if school.image_url else None,
+            'logo_url': f"{school_service.static_folder_logo}/{school.logo_url}" if school.logo_url else None,
             'website_url': str(school.website_url) if school.website_url else None,
         })
 
@@ -169,7 +168,6 @@ def read_schools(
 @router.get("/{school_id}", response_model=GeneralDataResponse, status_code=status.HTTP_200_OK)
 def read_school(
     school_id: str,
-    request: Request,
     db: Session = Depends(get_db), 
     payload = Depends(Authentication())
 ):
@@ -179,7 +177,7 @@ def read_school(
         - should login
     """
     school_service = SchoolService(db)
-    base_url = str(request.base_url) if request else ""
+    
     school = school_service.school_repository.read_school(school_id)
 
     if not school:
@@ -196,8 +194,8 @@ def read_school(
             'is_active': school.is_active,
             'created_at': str(school.created_at),
             'updated_at': str(school.updated_at),
-            'image_url': f"{base_url}{school_service.static_folder_image}/{school.image_url}" if school.image_url else None,
-            'logo_url': f"{base_url}{school_service.static_folder_logo}/{school.logo_url}" if school.logo_url else None,
+            'image_url': f"{school_service.static_folder_image}/{school.image_url}" if school.image_url else None,
+            'logo_url': f"{school_service.static_folder_logo}/{school.logo_url}" if school.logo_url else None,
             'website_url': str(school.website_url) if school.website_url else None,
         },
     )
